@@ -1,12 +1,10 @@
 package com.laiba.backend.controller;
 
+import com.laiba.backend.dto.ChangePasswordRequest;
 import com.laiba.backend.dto.LoginRequest;
 import com.laiba.backend.dto.RegisterRequest;
 import com.laiba.backend.service.AuthService;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -23,5 +21,9 @@ public class AuthController {
     @PostMapping("/login")
     public String login(@RequestBody LoginRequest request) {
         return authService.login(request);
+    }
+    @PostMapping("/changepassword")
+    public String changePassword(@RequestBody ChangePasswordRequest request) {
+        return authService.changePassword(request);
     }
 }

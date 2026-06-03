@@ -1,5 +1,6 @@
 package com.laiba.backend.service.impl;
 
+import com.laiba.backend.dto.ChangePasswordRequest;
 import com.laiba.backend.dto.LoginRequest;
 import com.laiba.backend.dto.RegisterRequest;
 import com.laiba.backend.entity.Users;
@@ -17,7 +18,7 @@ public class AuthServiceImpl implements AuthService {
     private final UserMapper userMapper;
     private final JWTService jwtService;
 
-    public AuthServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, UserMapper userMapper,  JWTService jwtService) {
+    public AuthServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, UserMapper userMapper, JWTService jwtService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.userMapper = userMapper;
@@ -29,11 +30,11 @@ public class AuthServiceImpl implements AuthService {
         String identifier = registerRequest.getIdentifier();
         if (identifier.contains("@")) {
             if (userRepository.findByEmail(identifier).isPresent()) {
-                return "user already exists";
+                return "user already exist";
             }
         } else {
             if (userRepository.findByPhoneNo(identifier).isPresent()) {
-                return "user already exists";
+                return "user already exist";
             }
         }
         Users user = userMapper.toEntity(registerRequest);
@@ -53,34 +54,55 @@ public class AuthServiceImpl implements AuthService {
         String password = loginRequest.getPassword();
         if (identifier.contains("@")) {
             if (userRepository.findByEmail(identifier).isPresent()) {
-               Users user = userRepository.findByEmail(identifier).get();
-               if(passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())){
-                   String token = jwtService.generateToken(identifier);
-                   return token;
-               }
-               else
-                   return "invalid password";
-            }
-            else
-                return "user does not exists";
+                Users user = userRepository.findByEmail(identifier).get();
+                if (passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
+                    String token = jwtService.generateToken(identifier);
+                    return token;
+                } else
+                    return "invalid password";
+            } else
+                return "user does not exist";
         } else {
             if (userRepository.findByPhoneNo(identifier).isPresent()) {
                 Users user = userRepository.findByPhoneNo(identifier).get();
-                if(passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())){
+                if (passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
                     String token = jwtService.generateToken(identifier);
                     return token;
-                }
-                else
+                } else
                     return "invalid password";
-            }
-            else
-                return "user does not exists";
+            } else
+                return "user does not exist";
         }
 
     }
 
     @Override
-    public String changePassword(String oldPassword, String newPassword) {
-        return "";
+    public String changePassword(ChangePasswordRequest changePasswordRequest) {
+        String identifier = changePasswordRequest.getIdentifier();
+        String oldPassword = changePasswordRequest.getOldPassword();
+        String newPassword = changePasswordRequest.getNewPassword();
+        if (identifier.contains("@")) {
+            if (userRepository.findByEmail(identifier).isPresent()) {
+                Users user = userRepository.findByEmail(identifier).get();
+                if (passwordEncoder.matches(oldPassword, user.getPassword())) {
+                    user.setPassword(passwordEncoder.encode(newPassword));
+                    userRepository.save(user);
+                    return "password changed successfully";
+                } else
+                    return "invalid old password";
+            } else
+                return "user does not exist";
+        } else {
+            if (userRepository.findByPhoneNo(identifier).isPresent()) {
+                Users user = userRepository.findByPhoneNo(identifier).get();
+                if (passwordEncoder.matches(oldPassword, user.getPassword())) {
+                    user.setPassword(passwordEncoder.encode(newPassword));
+                    userRepository.save(user);
+                    return "password changed successfully";
+                } else
+                    return "invalid old password";
+            } else
+                return "user does not exist";
+        }
     }
 }

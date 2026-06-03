@@ -49,7 +49,34 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public String login(LoginRequest loginRequest) {
-      return "";
+        String identifier = loginRequest.getIdentifier();
+        String password = loginRequest.getPassword();
+        if (identifier.contains("@")) {
+            if (userRepository.findByEmail(identifier).isPresent()) {
+               Users user = userRepository.findByEmail(identifier).get();
+               if(passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())){
+                   String token = jwtService.generateToken(identifier);
+                   return token;
+               }
+               else
+                   return "invalid password";
+            }
+            else
+                return "user does not exists";
+        } else {
+            if (userRepository.findByPhoneNo(identifier).isPresent()) {
+                Users user = userRepository.findByPhoneNo(identifier).get();
+                if(passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())){
+                    String token = jwtService.generateToken(identifier);
+                    return token;
+                }
+                else
+                    return "invalid password";
+            }
+            else
+                return "user does not exists";
+        }
+
     }
 
     @Override

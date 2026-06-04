@@ -8,12 +8,17 @@ import com.laiba.backend.mapper.UserMapper;
 import com.laiba.backend.repository.UserRepository;
 import com.laiba.backend.service.AuthService;
 import com.laiba.backend.service.JWTService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
 public class AuthServiceImpl implements AuthService {
+
+    private static final Logger log = LoggerFactory.getLogger(AuthServiceImpl.class);
+
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
@@ -29,15 +34,20 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public String register(RegisterRequest registerRequest) {
         String identifier = registerRequest.getIdentifier();
+        log.info("Registration attempt for identifier: {}", identifier);
+
         if (identifier.contains("@")) {
             if (userRepository.findByEmail(identifier).isPresent()) {
+                log.warn("Registration failed - user already exists with email: {}", identifier);
                 return "user already exist";
             }
         } else {
             if (userRepository.findByPhoneNo(identifier).isPresent()) {
+                log.warn("Registration failed - user already exists with phone: {}", identifier);
                 return "user already exist";
             }
         }
+
         Users user = userMapper.toEntity(registerRequest);
         if (identifier.contains("@")) {
             user.setEmail(identifier);
@@ -46,66 +56,86 @@ public class AuthServiceImpl implements AuthService {
         }
         user.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
         userRepository.save(user);
+
+        log.info("User registered successfully for identifier: {}", identifier);
         return "User registered successfully";
     }
 
     @Override
     public String login(LoginRequest loginRequest) {
         String identifier = loginRequest.getIdentifier();
-        String password = loginRequest.getPassword();
+        log.info("Login attempt for identifier: {}", identifier);
+
         if (identifier.contains("@")) {
             if (userRepository.findByEmail(identifier).isPresent()) {
                 Users user = userRepository.findByEmail(identifier).get();
                 if (passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
                     String token = jwtService.generateToken(identifier);
+                    log.info("Login successful for email: {}", identifier);
                     return token;
-                } else
+                } else {
+                    log.warn("Login failed - invalid password for email: {}", identifier);
                     return "invalid password";
-            } else
+                }
+            } else {
+                log.warn("Login failed - user not found for email: {}", identifier);
                 return "user does not exist";
+            }
         } else {
             if (userRepository.findByPhoneNo(identifier).isPresent()) {
                 Users user = userRepository.findByPhoneNo(identifier).get();
                 if (passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
                     String token = jwtService.generateToken(identifier);
+                    log.info("Login successful for phone: {}", identifier);
                     return token;
-                } else
+                } else {
+                    log.warn("Login failed - invalid password for phone: {}", identifier);
                     return "invalid password";
-            } else
+                }
+            } else {
+                log.warn("Login failed - user not found for phone: {}", identifier);
                 return "user does not exist";
+            }
         }
-
     }
 
     @Override
     public String changePassword(ChangePasswordRequest changePasswordRequest) {
-        String identifier = SecurityContextHolder.getContext()
-                .getAuthentication()
-                .getName();
-        String oldPassword = changePasswordRequest.getOldPassword();
-        String newPassword = changePasswordRequest.getNewPassword();
+        String identifier = SecurityContextHolder.getContext().getAuthentication().getName();
+        log.info("Change password attempt for identifier: {}", identifier);
+
         if (identifier.contains("@")) {
             if (userRepository.findByEmail(identifier).isPresent()) {
                 Users user = userRepository.findByEmail(identifier).get();
-                if (passwordEncoder.matches(oldPassword, user.getPassword())) {
-                    user.setPassword(passwordEncoder.encode(newPassword));
+                if (passwordEncoder.matches(changePasswordRequest.getOldPassword(), user.getPassword())) {
+                    user.setPassword(passwordEncoder.encode(changePasswordRequest.getNewPassword()));
                     userRepository.save(user);
+                    log.info("Password changed successfully for email: {}", identifier);
                     return "password changed successfully";
-                } else
+                } else {
+                    log.warn("Change password failed - invalid old password for email: {}", identifier);
                     return "invalid old password";
-            } else
+                }
+            } else {
+                log.warn("Change password failed - user not found for email: {}", identifier);
                 return "user does not exist";
+            }
         } else {
             if (userRepository.findByPhoneNo(identifier).isPresent()) {
                 Users user = userRepository.findByPhoneNo(identifier).get();
-                if (passwordEncoder.matches(oldPassword, user.getPassword())) {
-                    user.setPassword(passwordEncoder.encode(newPassword));
+                if (passwordEncoder.matches(changePasswordRequest.getOldPassword(), user.getPassword())) {
+                    user.setPassword(passwordEncoder.encode(changePasswordRequest.getNewPassword()));
                     userRepository.save(user);
+                    log.info("Password changed successfully for phone: {}", identifier);
                     return "password changed successfully";
-                } else
+                } else {
+                    log.warn("Change password failed - invalid old password for phone: {}", identifier);
                     return "invalid old password";
-            } else
+                }
+            } else {
+                log.warn("Change password failed - user not found for phone: {}", identifier);
                 return "user does not exist";
+            }
         }
     }
 }

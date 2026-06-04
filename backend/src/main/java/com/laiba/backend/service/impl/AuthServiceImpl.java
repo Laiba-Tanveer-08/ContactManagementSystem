@@ -8,6 +8,7 @@ import com.laiba.backend.mapper.UserMapper;
 import com.laiba.backend.repository.UserRepository;
 import com.laiba.backend.service.AuthService;
 import com.laiba.backend.service.JWTService;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -78,7 +79,9 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public String changePassword(ChangePasswordRequest changePasswordRequest) {
-        String identifier = changePasswordRequest.getIdentifier();
+        String identifier = SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getName();
         String oldPassword = changePasswordRequest.getOldPassword();
         String newPassword = changePasswordRequest.getNewPassword();
         if (identifier.contains("@")) {

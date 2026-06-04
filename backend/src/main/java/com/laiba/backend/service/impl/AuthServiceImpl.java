@@ -3,6 +3,7 @@ package com.laiba.backend.service.impl;
 import com.laiba.backend.dto.ChangePasswordRequest;
 import com.laiba.backend.dto.LoginRequest;
 import com.laiba.backend.dto.RegisterRequest;
+import com.laiba.backend.dto.UserResponse;
 import com.laiba.backend.entity.Users;
 import com.laiba.backend.mapper.UserMapper;
 import com.laiba.backend.repository.UserRepository;
@@ -137,5 +138,35 @@ public class AuthServiceImpl implements AuthService {
                 return "user does not exist";
             }
         }
+    }
+
+    @Override
+    public UserResponse getProfile() {
+        String identifier = SecurityContextHolder.getContext().getAuthentication().getName();
+        log.info("Fetching profile for identifier: {}", identifier);
+
+        Users user;
+        if (identifier.contains("@")) {
+            user = userRepository.findByEmail(identifier).orElse(null);
+        } else {
+            user = userRepository.findByPhoneNo(identifier).orElse(null);
+        }
+
+        if (user == null) {
+            log.warn("Profile fetch failed - user not found for identifier: {}", identifier);
+            return null;
+        }
+
+        log.info("Profile fetched successfully for identifier: {}", identifier);
+        return new UserResponse(user.getUserId(), user.getFirstName(), user.getLastName(), user.getEmail(), user.getPhoneNo());
+    }
+
+    @Override
+    public String logout() {
+        String identifier = SecurityContextHolder.getContext().getAuthentication().getName();
+        log.info("Logout for identifier: {}", identifier);
+        SecurityContextHolder.clearContext();
+        log.info("Security context cleared for identifier: {}", identifier);
+        return "Logged out successfully";
     }
 }

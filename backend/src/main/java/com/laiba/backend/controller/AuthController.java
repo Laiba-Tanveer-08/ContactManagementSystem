@@ -3,9 +3,11 @@ package com.laiba.backend.controller;
 import com.laiba.backend.dto.ChangePasswordRequest;
 import com.laiba.backend.dto.LoginRequest;
 import com.laiba.backend.dto.RegisterRequest;
+import com.laiba.backend.dto.UserResponse;
 import com.laiba.backend.service.AuthService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -42,5 +44,22 @@ public class AuthController {
         String result = authService.changePassword(request);
         log.info("Change password result: {}", result);
         return result;
+    }
+
+    @GetMapping("/profile")
+    public ResponseEntity<UserResponse> getProfile() {
+        log.info("GET /api/auth/profile");
+        UserResponse profile = authService.getProfile();
+        if (profile == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(profile);
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<String> logout() {
+        log.info("POST /api/auth/logout");
+        String result = authService.logout();
+        return ResponseEntity.ok(result);
     }
 }

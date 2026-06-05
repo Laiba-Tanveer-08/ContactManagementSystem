@@ -38,7 +38,6 @@ public class JWTService {
         try {
             return parseClaims(token).getSubject();
         } catch (ExpiredJwtException e) {
-            // even expired token still contains claims
             return e.getClaims().getSubject();
         }
     }

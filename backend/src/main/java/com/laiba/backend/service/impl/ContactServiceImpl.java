@@ -42,6 +42,7 @@ public class ContactServiceImpl implements ContactService {
         this.contactInfoMapper = contactInfoMapper;
     }
 
+    // Pulls the logged-in user from the security context and loads them from the database
     private Users getCurrentUser() {
         String identifier = SecurityContextHolder.getContext().getAuthentication().getName();
         if (identifier == null) {
@@ -70,6 +71,7 @@ public class ContactServiceImpl implements ContactService {
         Contacts contact = contactMapper.toEntity(contactRequest);
         contact.setUser(user);
 
+        // Map each contact info and link it back to the parent contact
         if (contactRequest.getContactInfos() != null) {
             List<ContactInfo> infos = contactRequest.getContactInfos().stream().map(dto -> {
                 ContactInfo info = contactInfoMapper.toEntity(dto);
@@ -104,6 +106,7 @@ public class ContactServiceImpl implements ContactService {
             return new ContactNotFoundException("Contact not found");
         });
 
+        // Make sure this contact actually belongs to the logged-in user
         if (!contact.getUser().getUserId().equals(user.getUserId())) {
             log.warn("Unauthorized access attempt to contact id: {} by user: {}", id, user.getUsername());
             throw new UnauthorizedException("Unauthorized access");
@@ -122,6 +125,7 @@ public class ContactServiceImpl implements ContactService {
             return new ContactNotFoundException("Contact not found");
         });
 
+        // Make sure this contact actually belongs to the logged-in user
         if (!contact.getUser().getUserId().equals(user.getUserId())) {
             log.warn("Unauthorized update attempt on contact id: {} by user: {}", id, user.getUsername());
             throw new UnauthorizedException("Unauthorized access");
@@ -130,8 +134,9 @@ public class ContactServiceImpl implements ContactService {
         contact.setFirstName(contactRequest.getFirstName());
         contact.setLastName(contactRequest.getLastName());
         contact.setTitle(contactRequest.getTitle());
-        contact.getContactInfos().clear();
 
+        // Clear old contact info and replace with the new ones
+        contact.getContactInfos().clear();
         if (contactRequest.getContactInfos() != null) {
             List<ContactInfo> infos = contactRequest.getContactInfos().stream().map(dto -> {
                 ContactInfo info = contactInfoMapper.toEntity(dto);
@@ -156,6 +161,7 @@ public class ContactServiceImpl implements ContactService {
             return new ContactNotFoundException("Contact not found");
         });
 
+        // Make sure this contact actually belongs to the logged-in user
         if (!contact.getUser().getUserId().equals(user.getUserId())) {
             log.warn("Unauthorized delete attempt on contact id: {} by user: {}", id, user.getUsername());
             throw new UnauthorizedException("Unauthorized access");

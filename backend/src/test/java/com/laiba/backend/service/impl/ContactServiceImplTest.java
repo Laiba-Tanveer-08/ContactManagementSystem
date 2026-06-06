@@ -74,6 +74,7 @@ class ContactServiceImplTest {
         mockResponse.setFirstName("John");
         mockResponse.setLastName("Doe");
 
+        // Set up a fake logged-in user for all tests in this class
         Authentication auth = mock(Authentication.class);
         SecurityContext ctx = mock(SecurityContext.class);
         when(ctx.getAuthentication()).thenReturn(auth);

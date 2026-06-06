@@ -7,7 +7,10 @@ import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
 public interface ContactInfoMapper {
+
+    // Contact is set manually in the service, so we skip it here
     @Mapping(target = "contact", ignore = true)
     ContactInfo toEntity(ContactInfoRequest contactInfoRequest);
+
     ContactInfoRequest toDto(ContactInfo contactInfo);
 }

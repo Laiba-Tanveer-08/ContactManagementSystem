@@ -57,6 +57,7 @@ public class GlobalExceptionHandler {
                 .body(ex.getMessage());
     }
 
+    // Catch-all for anything unexpected
     @ExceptionHandler(Exception.class)
     public ResponseEntity<String> handleGeneralException(
             Exception ex) {

@@ -36,6 +36,7 @@ public class Users implements UserDetails {
     @Column(name = "password", nullable = false)
     private String password;
 
+    // Deleting a user also removes all their contacts
     @OneToMany(
             mappedBy = "user",
             cascade = CascadeType.ALL,
@@ -48,6 +49,7 @@ public class Users implements UserDetails {
         return List.of();
     }
 
+    // User can log in with either email or phone number
     @Override
     public String getUsername() {
         return email != null ? email : phoneNo;

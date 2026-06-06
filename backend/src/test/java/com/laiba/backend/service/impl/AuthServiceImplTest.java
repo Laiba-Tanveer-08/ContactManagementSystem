@@ -48,6 +48,7 @@ class AuthServiceImplTest {
         mockUser.setPassword("encodedPassword");
     }
 
+    // Helper to mock the security context so we can simulate a logged-in user
     private void mockSecurityContext(String identifier) {
         Authentication auth = mock(Authentication.class);
         SecurityContext ctx = mock(SecurityContext.class);

@@ -37,6 +37,7 @@ public class AuthServiceImpl implements AuthService {
         String identifier = registerRequest.getIdentifier();
         log.info("Registration attempt for identifier: {}", identifier);
 
+        // Check if identifier is email or phone and block duplicate registrations
         if (identifier.contains("@")) {
             if (userRepository.findByEmail(identifier).isPresent()) {
                 log.warn("Registration failed - user already exists with email: {}", identifier);
@@ -108,6 +109,7 @@ public class AuthServiceImpl implements AuthService {
         if (identifier.contains("@")) {
             if (userRepository.findByEmail(identifier).isPresent()) {
                 Users user = userRepository.findByEmail(identifier).get();
+                // Make sure old password matches before updating
                 if (passwordEncoder.matches(changePasswordRequest.getOldPassword(), user.getPassword())) {
                     user.setPassword(passwordEncoder.encode(changePasswordRequest.getNewPassword()));
                     userRepository.save(user);
@@ -124,6 +126,7 @@ public class AuthServiceImpl implements AuthService {
         } else {
             if (userRepository.findByPhoneNo(identifier).isPresent()) {
                 Users user = userRepository.findByPhoneNo(identifier).get();
+                // Make sure old password matches before updating
                 if (passwordEncoder.matches(changePasswordRequest.getOldPassword(), user.getPassword())) {
                     user.setPassword(passwordEncoder.encode(changePasswordRequest.getNewPassword()));
                     userRepository.save(user);
@@ -146,6 +149,7 @@ public class AuthServiceImpl implements AuthService {
         log.info("Fetching profile for identifier: {}", identifier);
 
         Users user;
+        // Resolve user by email or phone depending on how they registered
         if (identifier.contains("@")) {
             user = userRepository.findByEmail(identifier).orElse(null);
         } else {

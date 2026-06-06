@@ -38,6 +38,7 @@ public class JWTService {
         try {
             return parseClaims(token).getSubject();
         } catch (ExpiredJwtException e) {
+            // Still return the subject even if the token is expired so we can log who it was
             return e.getClaims().getSubject();
         }
     }

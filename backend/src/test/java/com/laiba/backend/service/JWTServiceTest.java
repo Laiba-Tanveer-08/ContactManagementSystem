@@ -33,6 +33,7 @@ class JWTServiceTest {
     void generateToken_tokenHasThreeParts() {
         String token = jwtService.generateToken("test@example.com");
 
+        // A valid JWT always has 3 dot-separated parts
         assertEquals(3, token.split("\\.").length);
     }
 
@@ -74,6 +75,7 @@ class JWTServiceTest {
 
     @Test
     void isTokenValid_expiredToken_returnsFalse() {
+        // Set expiration to negative so the token is already expired when generated
         ReflectionTestUtils.setField(jwtService, "expiration", -1000L);
         String token = jwtService.generateToken("test@example.com");
 

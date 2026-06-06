@@ -1,4 +1,3 @@
-// src/main/java/com/laiba/backend/config/CorsConfig.java
 package com.laiba.backend.config;
 
 import org.springframework.context.annotation.Bean;
@@ -13,6 +12,7 @@ public class CorsConfig {
     @Bean
     public CorsFilter corsFilter() {
         CorsConfiguration config = new CorsConfiguration();
+        // Allow any localhost port so dev servers don't get blocked
         config.addAllowedOriginPattern("http://localhost:*");
         config.addAllowedMethod("*");
         config.addAllowedHeader("*");

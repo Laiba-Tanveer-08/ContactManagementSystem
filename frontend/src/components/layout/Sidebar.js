@@ -1,15 +1,16 @@
 import React, { useRef } from 'react';
+import PropTypes from 'prop-types';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { logout, getContacts, createContact } from '../../services/api';
 import './Sidebar.css';
 
-// SVG icons kept as small components so they're easy to reuse
 const ContactsIcon = () => (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
         <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
         <circle cx="9" cy="7" r="4"/>
-        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
     </svg>
 );
 
@@ -23,7 +24,8 @@ const ProfileIcon = () => (
 const LogoutIcon = () => (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
         <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-        <polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+        <polyline points="16 17 21 12 16 7"/>
+        <line x1="21" y1="12" x2="9" y2="12"/>
     </svg>
 );
 
@@ -43,7 +45,6 @@ const DownloadIcon = () => (
     </svg>
 );
 
-// Grabs the first email from contactInfos or falls back to emailAddresses
 function getPrimaryEmail(contact) {
     if (contact.contactInfos?.length) {
         const found = contact.contactInfos.find(ci => ci.type === 'EMAIL' || ci.type === 'email');
@@ -52,7 +53,6 @@ function getPrimaryEmail(contact) {
     return contact.emailAddresses?.[0]?.email || '';
 }
 
-// Grabs the first phone from contactInfos or falls back to phoneNumbers
 function getPrimaryPhone(contact) {
     if (contact.contactInfos?.length) {
         const found = contact.contactInfos.find(ci => ci.type === 'PHONE' || ci.type === 'phone');
@@ -67,7 +67,7 @@ export default function Sidebar({ onImportDone }) {
     const fileInputRef = useRef();
 
     const handleLogout = async () => {
-        try { await logout(); } catch {}
+        try { await logout(); } catch { /* ignore logout errors */ }
         signOut();
         navigate('/login');
     };
@@ -86,9 +86,8 @@ export default function Sidebar({ onImportDone }) {
                 getPrimaryPhone(c),
             ]);
 
-            // Build CSV string and wrap each value in quotes to handle commas inside values
             const csvContent = [headers, ...rows]
-                .map(row => row.map(val => `"${String(val).replace(/"/g, '""')}"`).join(','))
+                .map(row => row.map(val => `"${String(val).replaceAll('"', '""')}"`).join(','))
                 .join('\n');
 
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -112,7 +111,7 @@ export default function Sidebar({ onImportDone }) {
         reader.onload = async (event) => {
             const text = event.target.result;
             const lines = text.trim().split('\n');
-            const dataLines = lines.slice(1); // Skip the header row
+            const dataLines = lines.slice(1);
 
             let success = 0;
             let failed = 0;
@@ -120,9 +119,8 @@ export default function Sidebar({ onImportDone }) {
             for (const line of dataLines) {
                 if (!line.trim()) continue;
                 try {
-                    // Parse CSV columns, handling quoted values with commas inside
                     const cols = line.match(/(".*?"|[^,]+|(?<=,)(?=,)|^(?=,)|(?<=,)$)/g) || [];
-                    const clean = cols.map(v => v.replace(/^"|"$/g, '').replace(/""/g, '"').trim());
+                    const clean = cols.map(v => v.replaceAll(/^"|"$/g, '').replaceAll('""', '"').trim());
                     const [firstName, lastName, title, email, phone] = clean;
 
                     if (!firstName && !lastName) { failed++; continue; }
@@ -134,7 +132,7 @@ export default function Sidebar({ onImportDone }) {
                         contactInfos: [
                             ...(email ? [{ type: 'EMAIL', value: email, label: 'personal' }] : []),
                             ...(phone ? [{ type: 'PHONE', value: phone, label: 'personal' }] : []),
-                        ]
+                        ],
                     };
 
                     await createContact(payload);
@@ -144,7 +142,6 @@ export default function Sidebar({ onImportDone }) {
                 }
             }
 
-            // Notify the dashboard so it can refresh and show the import result
             if (onImportDone) onImportDone(success, failed);
         };
 
@@ -195,3 +192,11 @@ export default function Sidebar({ onImportDone }) {
         </aside>
     );
 }
+
+Sidebar.propTypes = {
+    onImportDone: PropTypes.func,
+};
+
+Sidebar.defaultProps = {
+    onImportDone: undefined,
+};

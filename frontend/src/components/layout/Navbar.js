@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { useAuth } from '../../context/AuthContext';
 import './Navbar.css';
 
@@ -21,7 +22,6 @@ export default function Navbar({ onSearch, searchValue }) {
                 />
             </div>
 
-            {/* Only show the user info if we have a name to display */}
             {displayName && (
                 <div className="navbar-user">
                     <div className="navbar-avatar">{displayName.charAt(0).toUpperCase()}</div>
@@ -31,3 +31,13 @@ export default function Navbar({ onSearch, searchValue }) {
         </header>
     );
 }
+
+Navbar.propTypes = {
+    onSearch: PropTypes.func,
+    searchValue: PropTypes.string,
+};
+
+Navbar.defaultProps = {
+    onSearch: undefined,
+    searchValue: '',
+};

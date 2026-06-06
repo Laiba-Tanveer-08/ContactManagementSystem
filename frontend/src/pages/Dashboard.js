@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import PropTypes from 'prop-types';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../components/layout/Layout';
 import ContactFormModal from '../components/modals/ContactFormModal';
@@ -48,13 +49,12 @@ export default function Dashboard() {
             setContacts(data.content || []);
             setTotalPages(data.totalPages || 1);
             setTotalElements(data.totalElements || 0);
-        } catch {}
+        } catch { /* suppress load errors */ }
         setLoading(false);
     }, []);
 
     useEffect(() => { load(search, page); }, [load, search, page]);
 
-    // Called by Sidebar after CSV import finishes so we can refresh the list
     const handleImportDone = (success, failed) => {
         setImportStatus(`✓ Imported ${success} contacts${failed > 0 ? `, ${failed} failed` : ''}`);
         setTimeout(() => setImportStatus(''), 4000);
@@ -83,7 +83,6 @@ export default function Dashboard() {
         load(search, page);
     };
 
-    // Build page number array, capped at 4 visible buttons
     const pageNums = () => {
         const pages = [];
         const maxVisible = 4;
@@ -112,9 +111,7 @@ export default function Dashboard() {
                         </div>
                     </div>
 
-                    {importStatus && (
-                        <div className="import-status">{importStatus}</div>
-                    )}
+                    {importStatus && <div className="import-status">{importStatus}</div>}
 
                     {loading ? (
                         <div className="loading-state">Loading contacts…</div>
@@ -198,6 +195,21 @@ function ContactCard({ contact, onView, onEdit, onDelete }) {
         </div>
     );
 }
+
+ContactCard.propTypes = {
+    contact: PropTypes.shape({
+        id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+        firstName: PropTypes.string,
+        lastName: PropTypes.string,
+        title: PropTypes.string,
+        contactInfos: PropTypes.array,
+        emailAddresses: PropTypes.array,
+        phoneNumbers: PropTypes.array,
+    }).isRequired,
+    onView: PropTypes.func.isRequired,
+    onEdit: PropTypes.func.isRequired,
+    onDelete: PropTypes.func.isRequired,
+};
 
 function PlusIcon() { return <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>; }
 function ChevronLeftIcon() { return <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="15 18 9 12 15 6"/></svg>; }

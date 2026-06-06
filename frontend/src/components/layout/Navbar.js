@@ -1,9 +1,9 @@
 import React from 'react';
-import {useAuth} from '../../context/AuthContext';
+import { useAuth } from '../../context/AuthContext';
 import './Navbar.css';
 
-export default function Navbar({onSearch, searchValue}) {
-    const {user} = useAuth();
+export default function Navbar({ onSearch, searchValue }) {
+    const { user } = useAuth();
     const displayName = user?.fullName || user?.name || '';
 
     return (
@@ -20,6 +20,8 @@ export default function Navbar({onSearch, searchValue}) {
                     onChange={e => onSearch && onSearch(e.target.value)}
                 />
             </div>
+
+            {/* Only show the user info if we have a name to display */}
             {displayName && (
                 <div className="navbar-user">
                     <div className="navbar-avatar">{displayName.charAt(0).toUpperCase()}</div>

@@ -34,7 +34,7 @@ export default function ChangePasswordModal({ onClose }) {
     setLoading(true);
     try {
       const res = await changePassword({
-        oldPassword: currentPassword,   // ← fixed: backend expects "oldPassword"
+        oldPassword: currentPassword,
         newPassword,
       });
       const msg = typeof res.data === 'string' ? res.data.toLowerCase() : '';

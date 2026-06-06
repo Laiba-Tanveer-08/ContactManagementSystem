@@ -54,7 +54,7 @@ export default function Dashboard() {
 
     useEffect(() => { load(search, page); }, [load, search, page]);
 
-    // Called by Sidebar after import finishes
+    // Called by Sidebar after CSV import finishes so we can refresh the list
     const handleImportDone = (success, failed) => {
         setImportStatus(`✓ Imported ${success} contacts${failed > 0 ? `, ${failed} failed` : ''}`);
         setTimeout(() => setImportStatus(''), 4000);
@@ -83,6 +83,7 @@ export default function Dashboard() {
         load(search, page);
     };
 
+    // Build page number array, capped at 4 visible buttons
     const pageNums = () => {
         const pages = [];
         const maxVisible = 4;

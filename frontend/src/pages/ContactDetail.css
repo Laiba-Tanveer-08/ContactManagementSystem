@@ -1,0 +1,136 @@
+.detail-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.back-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 6px 0;
+}
+
+.back-btn:hover {
+  color: var(--primary);
+}
+
+.detail-header-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.detail-card {
+  background: var(--white);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  max-width: 580px;
+  overflow: hidden;
+  margin: 0 auto;
+}
+
+.detail-top {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 24px;
+  border-bottom: 1px solid var(--border);
+}
+
+.detail-top h2 {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.detail-top span {
+  font-size: 15px;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.detail-section {
+  padding: 24px;
+}
+
+.detail-section h3 {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 18px;
+}
+
+.detail-group {
+  margin-bottom: 20px;
+}
+
+.detail-group-title {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+}
+
+.detail-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--bg);
+  color: var(--text-muted);
+}
+
+.detail-row:last-child {
+  border-bottom: none;
+}
+
+.detail-value {
+  flex: 1;
+  font-size: 16px;
+  color: var(--text);
+  font-weight: 500;
+}
+
+.label-tag {
+  font-size: 12px;
+  font-weight: 700;
+  padding: 2px 10px;
+  border-radius: 20px;
+}
+
+.label-work {
+  background: #DBEAFE;
+  color: #1D4ED8;
+}
+
+.label-personal {
+  background: #D1FAE5;
+  color: #065F46;
+}
+
+.label-mobile {
+  background: #DBEAFE;
+  color: #1D4ED8;
+}
+
+.label-home {
+  background: #FEF3C7;
+  color: #92400E;
+}
+
+.detail-plain {
+  font-size: 15px;
+  color: var(--text);
+  font-weight: 500;
+}

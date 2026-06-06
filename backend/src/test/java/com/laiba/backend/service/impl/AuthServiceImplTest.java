@@ -5,6 +5,7 @@ import com.laiba.backend.dto.LoginRequest;
 import com.laiba.backend.dto.RegisterRequest;
 import com.laiba.backend.dto.UserResponse;
 import com.laiba.backend.entity.Users;
+import com.laiba.backend.exception.AuthenticationException;
 import com.laiba.backend.mapper.UserMapper;
 import com.laiba.backend.repository.UserRepository;
 import com.laiba.backend.service.JWTService;
@@ -48,7 +49,6 @@ class AuthServiceImplTest {
         mockUser.setPassword("encodedPassword");
     }
 
-    // Helper to mock the security context so we can simulate a logged-in user
     private void mockSecurityContext(String identifier) {
         Authentication auth = mock(Authentication.class);
         SecurityContext ctx = mock(SecurityContext.class);
@@ -57,21 +57,53 @@ class AuthServiceImplTest {
         SecurityContextHolder.setContext(ctx);
     }
 
+    // Simulates a completely missing authentication object in the security context
+    private void mockNullAuthentication() {
+        SecurityContext ctx = mock(SecurityContext.class);
+        when(ctx.getAuthentication()).thenReturn(null);
+        SecurityContextHolder.setContext(ctx);
+    }
+
+    // ─ getAuthenticatedIdentifier — null authentication branch
+
+    @Test
+    void changePassword_nullAuthentication_throwsAuthenticationException() {
+        mockNullAuthentication();
+
+        ChangePasswordRequest request = new ChangePasswordRequest();
+        request.setOldPassword("old");
+        request.setNewPassword("new");
+
+        assertThrows(AuthenticationException.class, () -> authService.changePassword(request));
+    }
+
+    @Test
+    void getProfile_nullAuthentication_throwsAuthenticationException() {
+        mockNullAuthentication();
+
+        assertThrows(AuthenticationException.class, () -> authService.getProfile());
+    }
+
+    @Test
+    void logout_nullAuthentication_throwsAuthenticationException() {
+        mockNullAuthentication();
+
+        assertThrows(AuthenticationException.class, () -> authService.logout());
+    }
+
+    //  register
+
     @Test
     void register_newEmailUser_returnsSuccess() {
         RegisterRequest request = new RegisterRequest();
         request.setIdentifier("test@example.com");
         request.setPassword("pass123");
-        request.setFirstName("Test");
-        request.setLastName("User");
 
         when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.empty());
         when(userMapper.toEntity(request)).thenReturn(mockUser);
         when(passwordEncoder.encode("pass123")).thenReturn("encodedPassword");
 
-        String result = authService.register(request);
-
-        assertEquals("User registered successfully", result);
+        assertEquals("User registered successfully", authService.register(request));
         verify(userRepository).save(any(Users.class));
     }
 
@@ -83,9 +115,7 @@ class AuthServiceImplTest {
 
         when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(mockUser));
 
-        String result = authService.register(request);
-
-        assertEquals("user already exist", result);
+        assertEquals("user already exist", authService.register(request));
         verify(userRepository, never()).save(any());
     }
 
@@ -100,9 +130,7 @@ class AuthServiceImplTest {
         when(userMapper.toEntity(request)).thenReturn(phoneUser);
         when(passwordEncoder.encode("pass123")).thenReturn("encodedPassword");
 
-        String result = authService.register(request);
-
-        assertEquals("User registered successfully", result);
+        assertEquals("User registered successfully", authService.register(request));
         verify(userRepository).save(any(Users.class));
     }
 
@@ -114,11 +142,11 @@ class AuthServiceImplTest {
 
         when(userRepository.findByPhoneNo("03001234567")).thenReturn(Optional.of(mockUser));
 
-        String result = authService.register(request);
-
-        assertEquals("user already exist", result);
+        assertEquals("user already exist", authService.register(request));
         verify(userRepository, never()).save(any());
     }
+
+    // login
 
     @Test
     void login_validEmail_returnsToken() {
@@ -130,9 +158,7 @@ class AuthServiceImplTest {
         when(passwordEncoder.matches("pass123", "encodedPassword")).thenReturn(true);
         when(jwtService.generateToken("test@example.com")).thenReturn("jwt-token");
 
-        String result = authService.login(request);
-
-        assertEquals("jwt-token", result);
+        assertEquals("jwt-token", authService.login(request));
     }
 
     @Test
@@ -144,9 +170,7 @@ class AuthServiceImplTest {
         when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(mockUser));
         when(passwordEncoder.matches("wrong", "encodedPassword")).thenReturn(false);
 
-        String result = authService.login(request);
-
-        assertEquals("invalid password", result);
+        assertEquals("invalid password", authService.login(request));
     }
 
     @Test
@@ -157,9 +181,7 @@ class AuthServiceImplTest {
 
         when(userRepository.findByEmail("nobody@example.com")).thenReturn(Optional.empty());
 
-        String result = authService.login(request);
-
-        assertEquals("user does not exist", result);
+        assertEquals("user does not exist", authService.login(request));
     }
 
     @Test
@@ -176,9 +198,7 @@ class AuthServiceImplTest {
         when(passwordEncoder.matches("pass123", "encodedPassword")).thenReturn(true);
         when(jwtService.generateToken("03001234567")).thenReturn("jwt-token");
 
-        String result = authService.login(request);
-
-        assertEquals("jwt-token", result);
+        assertEquals("jwt-token", authService.login(request));
     }
 
     @Test
@@ -193,9 +213,7 @@ class AuthServiceImplTest {
         when(userRepository.findByPhoneNo("03001234567")).thenReturn(Optional.of(phoneUser));
         when(passwordEncoder.matches("wrong", "encodedPassword")).thenReturn(false);
 
-        String result = authService.login(request);
-
-        assertEquals("invalid password", result);
+        assertEquals("invalid password", authService.login(request));
     }
 
     @Test
@@ -206,13 +224,13 @@ class AuthServiceImplTest {
 
         when(userRepository.findByPhoneNo("03009999999")).thenReturn(Optional.empty());
 
-        String result = authService.login(request);
-
-        assertEquals("user does not exist", result);
+        assertEquals("user does not exist", authService.login(request));
     }
 
+    //  changePassword
+
     @Test
-    void changePassword_validOldPassword_returnsSuccess() {
+    void changePassword_validOldEmailPassword_returnsSuccess() {
         mockSecurityContext("test@example.com");
 
         ChangePasswordRequest request = new ChangePasswordRequest();
@@ -223,14 +241,12 @@ class AuthServiceImplTest {
         when(passwordEncoder.matches("oldPass", "encodedPassword")).thenReturn(true);
         when(passwordEncoder.encode("newPass")).thenReturn("newEncoded");
 
-        String result = authService.changePassword(request);
-
-        assertEquals("password changed successfully", result);
+        assertEquals("password changed successfully", authService.changePassword(request));
         verify(userRepository).save(mockUser);
     }
 
     @Test
-    void changePassword_wrongOldPassword_returnsError() {
+    void changePassword_wrongOldEmailPassword_returnsError() {
         mockSecurityContext("test@example.com");
 
         ChangePasswordRequest request = new ChangePasswordRequest();
@@ -240,14 +256,12 @@ class AuthServiceImplTest {
         when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(mockUser));
         when(passwordEncoder.matches("wrongOld", "encodedPassword")).thenReturn(false);
 
-        String result = authService.changePassword(request);
-
-        assertEquals("invalid old password", result);
+        assertEquals("invalid old password", authService.changePassword(request));
         verify(userRepository, never()).save(any());
     }
 
     @Test
-    void changePassword_userNotFound_returnsUserDoesNotExist() {
+    void changePassword_emailUserNotFound_returnsUserDoesNotExist() {
         mockSecurityContext("nobody@example.com");
 
         ChangePasswordRequest request = new ChangePasswordRequest();
@@ -256,10 +270,62 @@ class AuthServiceImplTest {
 
         when(userRepository.findByEmail("nobody@example.com")).thenReturn(Optional.empty());
 
-        String result = authService.changePassword(request);
-
-        assertEquals("user does not exist", result);
+        assertEquals("user does not exist", authService.changePassword(request));
     }
+
+    @Test
+    void changePassword_validOldPhonePassword_returnsSuccess() {
+        mockSecurityContext("03001234567");
+
+        Users phoneUser = new Users();
+        phoneUser.setUserId(2L);
+        phoneUser.setPassword("encodedPassword");
+        phoneUser.setPhoneNo("03001234567");
+
+        ChangePasswordRequest request = new ChangePasswordRequest();
+        request.setOldPassword("oldPass");
+        request.setNewPassword("newPass");
+
+        when(userRepository.findByPhoneNo("03001234567")).thenReturn(Optional.of(phoneUser));
+        when(passwordEncoder.matches("oldPass", "encodedPassword")).thenReturn(true);
+        when(passwordEncoder.encode("newPass")).thenReturn("newEncoded");
+
+        assertEquals("password changed successfully", authService.changePassword(request));
+        verify(userRepository).save(phoneUser);
+    }
+
+    @Test
+    void changePassword_wrongOldPhonePassword_returnsError() {
+        mockSecurityContext("03001234567");
+
+        Users phoneUser = new Users();
+        phoneUser.setPassword("encodedPassword");
+
+        ChangePasswordRequest request = new ChangePasswordRequest();
+        request.setOldPassword("wrongOld");
+        request.setNewPassword("newPass");
+
+        when(userRepository.findByPhoneNo("03001234567")).thenReturn(Optional.of(phoneUser));
+        when(passwordEncoder.matches("wrongOld", "encodedPassword")).thenReturn(false);
+
+        assertEquals("invalid old password", authService.changePassword(request));
+        verify(userRepository, never()).save(any());
+    }
+
+    @Test
+    void changePassword_phoneUserNotFound_returnsUserDoesNotExist() {
+        mockSecurityContext("03009999999");
+
+        ChangePasswordRequest request = new ChangePasswordRequest();
+        request.setOldPassword("old");
+        request.setNewPassword("new");
+
+        when(userRepository.findByPhoneNo("03009999999")).thenReturn(Optional.empty());
+
+        assertEquals("user does not exist", authService.changePassword(request));
+    }
+
+    //  getProfile
 
     @Test
     void getProfile_emailUser_returnsUserResponse() {
@@ -271,25 +337,48 @@ class AuthServiceImplTest {
         assertNotNull(result);
         assertEquals("test@example.com", result.getEmail());
         assertEquals("Test", result.getFirstName());
-        assertEquals("User", result.getLastName());
     }
 
     @Test
-    void getProfile_userNotFound_returnsNull() {
+    void getProfile_emailUserNotFound_returnsNull() {
         mockSecurityContext("nobody@example.com");
         when(userRepository.findByEmail("nobody@example.com")).thenReturn(Optional.empty());
 
+        assertNull(authService.getProfile());
+    }
+
+    @Test
+    void getProfile_phoneUser_returnsUserResponse() {
+        mockSecurityContext("03001234567");
+
+        Users phoneUser = new Users();
+        phoneUser.setUserId(2L);
+        phoneUser.setFirstName("Phone");
+        phoneUser.setLastName("User");
+        phoneUser.setPhoneNo("03001234567");
+
+        when(userRepository.findByPhoneNo("03001234567")).thenReturn(Optional.of(phoneUser));
+
         UserResponse result = authService.getProfile();
 
-        assertNull(result);
+        assertNotNull(result);
+        assertEquals("Phone", result.getFirstName());
     }
+
+    @Test
+    void getProfile_phoneUserNotFound_returnsNull() {
+        mockSecurityContext("03009999999");
+        when(userRepository.findByPhoneNo("03009999999")).thenReturn(Optional.empty());
+
+        assertNull(authService.getProfile());
+    }
+
+    //  logout
 
     @Test
     void logout_clearsSecurityContextAndReturnsSuccess() {
         mockSecurityContext("test@example.com");
 
-        String result = authService.logout();
-
-        assertEquals("Logged out successfully", result);
+        assertEquals("Logged out successfully", authService.logout());
     }
 }

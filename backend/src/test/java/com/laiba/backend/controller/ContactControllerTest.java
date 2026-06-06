@@ -112,7 +112,7 @@ class ContactControllerTest {
     @Test
     void searchContacts_returnsMatchingPage() throws Exception {
         ContactResponse response = new ContactResponse(1L, "John", "Doe", "Mr", null);
-        when(contactService.getContactsByName(eq("John"), eq(0), eq(10)))
+        when(contactService.getContactsByName("John", 0, 10))
                 .thenReturn(new PageImpl<>(List.of(response)));
 
         mockMvc.perform(get("/api/contact/search")

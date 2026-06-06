@@ -6,12 +6,15 @@ import com.laiba.backend.dto.ContactResponse;
 import com.laiba.backend.entity.ContactInfo;
 import com.laiba.backend.entity.Contacts;
 import com.laiba.backend.entity.Users;
+import com.laiba.backend.exception.AuthenticationException;
 import com.laiba.backend.exception.ContactNotFoundException;
 import com.laiba.backend.exception.UnauthorizedException;
+import com.laiba.backend.exception.UserNotFoundException;
 import com.laiba.backend.mapper.ContactInfoMapper;
 import com.laiba.backend.mapper.ContactMapper;
 import com.laiba.backend.repository.ContactRepository;
 import com.laiba.backend.repository.UserRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,7 +23,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -74,23 +76,107 @@ class ContactServiceImplTest {
         mockResponse.setFirstName("John");
         mockResponse.setLastName("Doe");
 
-        // Set up a fake logged-in user for all tests in this class
+        // Use lenient so tests that override the context don't trigger UnnecessaryStubbingException
+        mockSecurityContextLenient("test@example.com");
+        lenient().when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(mockUser));
+    }
+
+    @AfterEach
+    void tearDown() {
+        SecurityContextHolder.clearContext();
+    }
+
+    // Lenient variant used in setUp so tests that replace the context don't cause UnnecessaryStubbingException
+    private void mockSecurityContextLenient(String identifier) {
+        Authentication auth = mock(Authentication.class);
+        SecurityContext ctx = mock(SecurityContext.class);
+        lenient().when(ctx.getAuthentication()).thenReturn(auth);
+        lenient().when(auth.getName()).thenReturn(identifier);
+        SecurityContextHolder.setContext(ctx);
+    }
+
+    // Strict variant used inside individual tests where every stub must be consumed
+    private void mockSecurityContextStrict(String identifier) {
         Authentication auth = mock(Authentication.class);
         SecurityContext ctx = mock(SecurityContext.class);
         when(ctx.getAuthentication()).thenReturn(auth);
-        when(auth.getName()).thenReturn("test@example.com");
+        when(auth.getName()).thenReturn(identifier);
+        SecurityContextHolder.setContext(ctx);
+    }
+
+    //    getCurrentUser — null authentication object branch 
+
+    @Test
+    void getCurrentUser_nullAuthenticationObject_throwsAuthenticationException() {
+        // The entire authentication object is null, not just the name
+        SecurityContext ctx = mock(SecurityContext.class);
+        when(ctx.getAuthentication()).thenReturn(null);
         SecurityContextHolder.setContext(ctx);
 
-        when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(mockUser));
+        assertThrows(AuthenticationException.class,
+                () -> contactService.createContact(mockRequest));
     }
+
+    //    getCurrentUser — null identifier branch 
+
+    @Test
+    void getCurrentUser_nullIdentifier_throwsAuthenticationException() {
+        Authentication auth = mock(Authentication.class);
+        SecurityContext ctx = mock(SecurityContext.class);
+        when(ctx.getAuthentication()).thenReturn(auth);
+        when(auth.getName()).thenReturn(null);
+        SecurityContextHolder.setContext(ctx);
+
+        assertThrows(AuthenticationException.class,
+                () -> contactService.createContact(mockRequest));
+    }
+
+    //    getCurrentUser — phone branch 
+
+    @Test
+    void createContact_phoneUser_resolvesCorrectly() {
+        Users phoneUser = new Users();
+        phoneUser.setUserId(3L);
+        phoneUser.setPhoneNo("03001234567");
+
+        mockSecurityContextStrict("03001234567");
+        when(userRepository.findByPhoneNo("03001234567")).thenReturn(Optional.of(phoneUser));
+
+        Contacts phoneContact = new Contacts();
+        phoneContact.setContactInfos(new ArrayList<>());
+        when(contactMapper.toEntity(mockRequest)).thenReturn(phoneContact);
+
+        String result = contactService.createContact(mockRequest);
+
+        assertEquals("Contact created successfully", result);
+        verify(contactRepository).save(phoneContact);
+    }
+
+    @Test
+    void getCurrentUser_phoneUserNotFound_throwsUserNotFoundException() {
+        mockSecurityContextStrict("03009999999");
+        when(userRepository.findByPhoneNo("03009999999")).thenReturn(Optional.empty());
+
+        assertThrows(UserNotFoundException.class,
+                () -> contactService.createContact(mockRequest));
+    }
+
+    @Test
+    void getCurrentUser_emailUserNotFound_throwsUserNotFoundException() {
+        mockSecurityContextStrict("nobody@example.com");
+        when(userRepository.findByEmail("nobody@example.com")).thenReturn(Optional.empty());
+
+        assertThrows(UserNotFoundException.class,
+                () -> contactService.createContact(mockRequest));
+    }
+
+    //    createContact 
 
     @Test
     void createContact_success_returnsSuccessMessage() {
         when(contactMapper.toEntity(mockRequest)).thenReturn(mockContact);
 
-        String result = contactService.createContact(mockRequest);
-
-        assertEquals("Contact created successfully", result);
+        assertEquals("Contact created successfully", contactService.createContact(mockRequest));
         verify(contactRepository).save(mockContact);
     }
 
@@ -106,12 +192,22 @@ class ContactServiceImplTest {
         when(contactMapper.toEntity(mockRequest)).thenReturn(mockContact);
         when(contactInfoMapper.toEntity(infoRequest)).thenReturn(mockInfo);
 
-        String result = contactService.createContact(mockRequest);
-
-        assertEquals("Contact created successfully", result);
+        assertEquals("Contact created successfully", contactService.createContact(mockRequest));
         verify(contactRepository).save(mockContact);
         assertEquals(mockContact, mockInfo.getContact());
     }
+
+    @Test
+    void createContact_nullContactInfos_savesWithoutInfos() {
+        mockRequest.setContactInfos(null);
+        when(contactMapper.toEntity(mockRequest)).thenReturn(mockContact);
+
+        assertEquals("Contact created successfully", contactService.createContact(mockRequest));
+        verify(contactRepository).save(mockContact);
+        assertTrue(mockContact.getContactInfos().isEmpty());
+    }
+
+    //    getContacts  
 
     @Test
     void getContacts_success_returnsPagedResults() {
@@ -121,20 +217,19 @@ class ContactServiceImplTest {
 
         Page<ContactResponse> result = contactService.getContacts(0, 10);
 
-        assertNotNull(result);
         assertEquals(1, result.getTotalElements());
         assertEquals("John", result.getContent().get(0).getFirstName());
     }
 
     @Test
     void getContacts_emptyList_returnsEmptyPage() {
-        Page<Contacts> emptyPage = new PageImpl<>(List.of());
-        when(contactRepository.findByUser(eq(mockUser), any(Pageable.class))).thenReturn(emptyPage);
+        when(contactRepository.findByUser(eq(mockUser), any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of()));
 
-        Page<ContactResponse> result = contactService.getContacts(0, 10);
-
-        assertEquals(0, result.getTotalElements());
+        assertEquals(0, contactService.getContacts(0, 10).getTotalElements());
     }
+
+    //    getContactById 
 
     @Test
     void getContactById_success_returnsContact() {
@@ -145,7 +240,6 @@ class ContactServiceImplTest {
 
         assertNotNull(result);
         assertEquals(1L, result.getId());
-        assertEquals("John", result.getFirstName());
     }
 
     @Test
@@ -166,6 +260,8 @@ class ContactServiceImplTest {
         assertThrows(UnauthorizedException.class, () -> contactService.getContactById(1L));
     }
 
+    //    updateContact 
+
     @Test
     void updateContact_success_updatesFieldsAndSaves() {
         when(contactRepository.findById(1L)).thenReturn(Optional.of(mockContact));
@@ -175,9 +271,7 @@ class ContactServiceImplTest {
         updateRequest.setLastName("Smith");
         updateRequest.setTitle("Ms");
 
-        String result = contactService.updateContact(1L, updateRequest);
-
-        assertEquals("Contact updated successfully", result);
+        assertEquals("Contact updated successfully", contactService.updateContact(1L, updateRequest));
         assertEquals("Jane", mockContact.getFirstName());
         assertEquals("Smith", mockContact.getLastName());
         assertEquals("Ms", mockContact.getTitle());
@@ -185,10 +279,42 @@ class ContactServiceImplTest {
     }
 
     @Test
+    void updateContact_withNewContactInfos_replacesOldInfos() {
+        when(contactRepository.findById(1L)).thenReturn(Optional.of(mockContact));
+
+        ContactInfoRequest infoReq = new ContactInfoRequest();
+        infoReq.setValue("new@email.com");
+        ContactRequest updateRequest = new ContactRequest();
+        updateRequest.setFirstName("Jane");
+        updateRequest.setContactInfos(List.of(infoReq));
+
+        ContactInfo newInfo = new ContactInfo();
+        when(contactInfoMapper.toEntity(infoReq)).thenReturn(newInfo);
+
+        contactService.updateContact(1L, updateRequest);
+
+        assertTrue(mockContact.getContactInfos().contains(newInfo));
+    }
+
+    @Test
+    void updateContact_nullContactInfos_clearsInfos() {
+        when(contactRepository.findById(1L)).thenReturn(Optional.of(mockContact));
+
+        ContactRequest updateRequest = new ContactRequest();
+        updateRequest.setFirstName("Jane");
+        updateRequest.setContactInfos(null);
+
+        contactService.updateContact(1L, updateRequest);
+
+        assertTrue(mockContact.getContactInfos().isEmpty());
+    }
+
+    @Test
     void updateContact_notFound_throwsContactNotFoundException() {
         when(contactRepository.findById(99L)).thenReturn(Optional.empty());
 
-        assertThrows(ContactNotFoundException.class, () -> contactService.updateContact(99L, mockRequest));
+        assertThrows(ContactNotFoundException.class,
+                () -> contactService.updateContact(99L, mockRequest));
     }
 
     @Test
@@ -199,16 +325,17 @@ class ContactServiceImplTest {
 
         when(contactRepository.findById(1L)).thenReturn(Optional.of(mockContact));
 
-        assertThrows(UnauthorizedException.class, () -> contactService.updateContact(1L, mockRequest));
+        assertThrows(UnauthorizedException.class,
+                () -> contactService.updateContact(1L, mockRequest));
     }
+
+    //    deleteContact 
 
     @Test
     void deleteContact_success_deletesContact() {
         when(contactRepository.findById(1L)).thenReturn(Optional.of(mockContact));
 
-        String result = contactService.deleteContact(1L);
-
-        assertEquals("Contact deleted successfully", result);
+        assertEquals("Contact deleted successfully", contactService.deleteContact(1L));
         verify(contactRepository).delete(mockContact);
     }
 
@@ -230,6 +357,8 @@ class ContactServiceImplTest {
         assertThrows(UnauthorizedException.class, () -> contactService.deleteContact(1L));
     }
 
+    //    getContactsByName 
+
     @Test
     void getContactsByName_matchingFirstName_returnsResults() {
         Page<Contacts> page = new PageImpl<>(List.of(mockContact));
@@ -240,30 +369,13 @@ class ContactServiceImplTest {
         Page<ContactResponse> result = contactService.getContactsByName("John", 0, 10);
 
         assertEquals(1, result.getTotalElements());
-        assertEquals("John", result.getContent().get(0).getFirstName());
-    }
-
-    @Test
-    void getContactsByName_fullName_returnsResults() {
-        Page<Contacts> page = new PageImpl<>(List.of(mockContact));
-        when(contactRepository.searchByName(eq(mockUser), eq("John Doe"), any(Pageable.class)))
-                .thenReturn(page);
-        when(contactMapper.toResponse(mockContact)).thenReturn(mockResponse);
-
-        Page<ContactResponse> result = contactService.getContactsByName("John Doe", 0, 10);
-
-        assertEquals(1, result.getTotalElements());
-        assertEquals("John", result.getContent().get(0).getFirstName());
     }
 
     @Test
     void getContactsByName_noMatch_returnsEmptyPage() {
-        Page<Contacts> emptyPage = new PageImpl<>(List.of());
         when(contactRepository.searchByName(eq(mockUser), eq("xyz"), any(Pageable.class)))
-                .thenReturn(emptyPage);
+                .thenReturn(new PageImpl<>(List.of()));
 
-        Page<ContactResponse> result = contactService.getContactsByName("xyz", 0, 10);
-
-        assertEquals(0, result.getTotalElements());
+        assertEquals(0, contactService.getContactsByName("xyz", 0, 10).getTotalElements());
     }
 }

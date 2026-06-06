@@ -19,47 +19,77 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class ContactServiceImpl implements ContactService {
 
     private static final Logger log = LoggerFactory.getLogger(ContactServiceImpl.class);
 
+    private static final String CONTACT_NOT_FOUND_MSG = "Contact not found";
+    private static final String CONTACT_NOT_FOUND_LOG = "Contact not found with id: {}";
+    private static final String UNAUTHORIZED_LOG = "Unauthorized access attempt on contact id: {} by user: {}";
+
     private final ContactRepository contactRepository;
     private final ContactMapper contactMapper;
     private final UserRepository userRepository;
     private final ContactInfoMapper contactInfoMapper;
 
-    public ContactServiceImpl(ContactRepository contactRepository, ContactMapper contactMapper, UserRepository userRepository, ContactInfoMapper contactInfoMapper) {
+    public ContactServiceImpl(ContactRepository contactRepository, ContactMapper contactMapper,
+                              UserRepository userRepository, ContactInfoMapper contactInfoMapper) {
         this.contactRepository = contactRepository;
         this.contactMapper = contactMapper;
         this.userRepository = userRepository;
         this.contactInfoMapper = contactInfoMapper;
     }
 
-    // Pulls the logged-in user from the security context and loads them from the database
     private Users getCurrentUser() {
-        String identifier = SecurityContextHolder.getContext().getAuthentication().getName();
+        // Null check on authentication before accessing the identifier
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null) {
+            log.error("Authentication failed - no authentication object found in security context");
+            throw new AuthenticationException("User not authenticated");
+        }
+
+        String identifier = authentication.getName();
         if (identifier == null) {
             log.error("Authentication failed - no identifier found in security context");
             throw new AuthenticationException("User not authenticated");
         }
+
         log.debug("Resolving current user for identifier: {}", identifier);
         if (identifier.contains("@")) {
             return userRepository.findByEmail(identifier).orElseThrow(() -> {
-                log.error("User not found for email: {}", identifier);
+                log.error("User not found for email identifier");
                 return new UserNotFoundException("User not found");
             });
         } else {
             return userRepository.findByPhoneNo(identifier).orElseThrow(() -> {
-                log.error("User not found for phone: {}", identifier);
+                log.error("User not found for phone identifier");
                 return new UserNotFoundException("User not found");
             });
+        }
+    }
+
+    // Maps a list of ContactInfo DTOs to entities and links them to the given contact
+    private List<ContactInfo> buildContactInfoList(ContactRequest contactRequest, Contacts contact) {
+        return contactRequest.getContactInfos().stream()
+                .map(dto -> {
+                    ContactInfo info = contactInfoMapper.toEntity(dto);
+                    info.setContact(contact);
+                    return info;
+                })
+                .toList();
+    }
+
+    private void checkOwnership(Contacts contact, Users user, Long id, String action) {
+        if (!contact.getUser().getUserId().equals(user.getUserId())) {
+            log.warn(UNAUTHORIZED_LOG + " - action: {}", id, user.getUsername(), action);
+            throw new UnauthorizedException("Unauthorized access");
         }
     }
 
@@ -71,14 +101,8 @@ public class ContactServiceImpl implements ContactService {
         Contacts contact = contactMapper.toEntity(contactRequest);
         contact.setUser(user);
 
-        // Map each contact info and link it back to the parent contact
         if (contactRequest.getContactInfos() != null) {
-            List<ContactInfo> infos = contactRequest.getContactInfos().stream().map(dto -> {
-                ContactInfo info = contactInfoMapper.toEntity(dto);
-                info.setContact(contact);
-                return info;
-            }).collect(Collectors.toList());
-            contact.setContactInfos(infos);
+            contact.setContactInfos(buildContactInfoList(contactRequest, contact));
         }
 
         contactRepository.save(contact);
@@ -102,16 +126,11 @@ public class ContactServiceImpl implements ContactService {
         Users user = getCurrentUser();
 
         Contacts contact = contactRepository.findById(id).orElseThrow(() -> {
-            log.error("Contact not found with id: {}", id);
-            return new ContactNotFoundException("Contact not found");
+            log.error(CONTACT_NOT_FOUND_LOG, id);
+            return new ContactNotFoundException(CONTACT_NOT_FOUND_MSG);
         });
 
-        // Make sure this contact actually belongs to the logged-in user
-        if (!contact.getUser().getUserId().equals(user.getUserId())) {
-            log.warn("Unauthorized access attempt to contact id: {} by user: {}", id, user.getUsername());
-            throw new UnauthorizedException("Unauthorized access");
-        }
-
+        checkOwnership(contact, user, id, "read");
         return contactMapper.toResponse(contact);
     }
 
@@ -121,29 +140,19 @@ public class ContactServiceImpl implements ContactService {
         Users user = getCurrentUser();
 
         Contacts contact = contactRepository.findById(id).orElseThrow(() -> {
-            log.error("Contact not found with id: {}", id);
-            return new ContactNotFoundException("Contact not found");
+            log.error(CONTACT_NOT_FOUND_LOG, id);
+            return new ContactNotFoundException(CONTACT_NOT_FOUND_MSG);
         });
 
-        // Make sure this contact actually belongs to the logged-in user
-        if (!contact.getUser().getUserId().equals(user.getUserId())) {
-            log.warn("Unauthorized update attempt on contact id: {} by user: {}", id, user.getUsername());
-            throw new UnauthorizedException("Unauthorized access");
-        }
+        checkOwnership(contact, user, id, "update");
 
         contact.setFirstName(contactRequest.getFirstName());
         contact.setLastName(contactRequest.getLastName());
         contact.setTitle(contactRequest.getTitle());
 
-        // Clear old contact info and replace with the new ones
         contact.getContactInfos().clear();
         if (contactRequest.getContactInfos() != null) {
-            List<ContactInfo> infos = contactRequest.getContactInfos().stream().map(dto -> {
-                ContactInfo info = contactInfoMapper.toEntity(dto);
-                info.setContact(contact);
-                return info;
-            }).collect(Collectors.toList());
-            contact.getContactInfos().addAll(infos);
+            contact.getContactInfos().addAll(buildContactInfoList(contactRequest, contact));
         }
 
         contactRepository.save(contact);
@@ -157,16 +166,11 @@ public class ContactServiceImpl implements ContactService {
         Users user = getCurrentUser();
 
         Contacts contact = contactRepository.findById(id).orElseThrow(() -> {
-            log.error("Contact not found with id: {}", id);
-            return new ContactNotFoundException("Contact not found");
+            log.error(CONTACT_NOT_FOUND_LOG, id);
+            return new ContactNotFoundException(CONTACT_NOT_FOUND_MSG);
         });
 
-        // Make sure this contact actually belongs to the logged-in user
-        if (!contact.getUser().getUserId().equals(user.getUserId())) {
-            log.warn("Unauthorized delete attempt on contact id: {} by user: {}", id, user.getUsername());
-            throw new UnauthorizedException("Unauthorized access");
-        }
-
+        checkOwnership(contact, user, id, "delete");
         contactRepository.delete(contact);
         log.info("Contact deleted successfully with id: {}", id);
         return "Contact deleted successfully";
@@ -178,7 +182,8 @@ public class ContactServiceImpl implements ContactService {
         Users user = getCurrentUser();
         Pageable pageable = PageRequest.of(page, size);
         Page<Contacts> contacts = contactRepository.searchByName(user, name, pageable);
-        log.debug("Found {} contacts matching name '{}' for user: {}", contacts.getTotalElements(), name, user.getUsername());
+        log.debug("Found {} contacts matching name '{}' for user: {}", contacts.getTotalElements(),
+                name, user.getUsername());
         return contacts.map(contactMapper::toResponse);
     }
 }

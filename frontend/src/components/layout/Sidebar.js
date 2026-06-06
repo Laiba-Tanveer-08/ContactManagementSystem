@@ -1,8 +1,9 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { logout, getContacts, createContact } from '../../services/api';
+import { logout } from '../../services/api';
+import { ImportModal, ExportModal } from '../modals/ImportExportModal';
 import './Sidebar.css';
 
 const ContactsIcon = () => (
@@ -45,26 +46,11 @@ const DownloadIcon = () => (
     </svg>
 );
 
-function getPrimaryEmail(contact) {
-    if (contact.contactInfos?.length) {
-        const found = contact.contactInfos.find(ci => ci.type === 'EMAIL' || ci.type === 'email');
-        return found?.value || '';
-    }
-    return contact.emailAddresses?.[0]?.email || '';
-}
-
-function getPrimaryPhone(contact) {
-    if (contact.contactInfos?.length) {
-        const found = contact.contactInfos.find(ci => ci.type === 'PHONE' || ci.type === 'phone');
-        return found?.value || '';
-    }
-    return contact.phoneNumbers?.[0]?.number || '';
-}
-
 export default function Sidebar({ onImportDone }) {
     const { signOut } = useAuth();
     const navigate = useNavigate();
-    const fileInputRef = useRef();
+    const [showImport, setShowImport] = React.useState(false);
+    const [showExport, setShowExport] = React.useState(false);
 
     const handleLogout = async () => {
         try { await logout(); } catch { /* ignore logout errors */ }
@@ -72,124 +58,53 @@ export default function Sidebar({ onImportDone }) {
         navigate('/login');
     };
 
-    const handleExport = async () => {
-        try {
-            const res = await getContacts(0, 10000);
-            const allContacts = res.data.content || [];
-
-            const headers = ['FirstName', 'LastName', 'Title', 'Email', 'Phone'];
-            const rows = allContacts.map(c => [
-                c.firstName || '',
-                c.lastName || '',
-                c.title || '',
-                getPrimaryEmail(c),
-                getPrimaryPhone(c),
-            ]);
-
-            const csvContent = [headers, ...rows]
-                .map(row => row.map(val => `"${String(val).replaceAll('"', '""')}"`).join(','))
-                .join('\n');
-
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'contacts.csv';
-            a.click();
-            URL.revokeObjectURL(url);
-        } catch {
-            alert('Export failed. Please try again.');
-        }
-    };
-
-    const handleImport = (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        e.target.value = '';
-
-        const reader = new FileReader();
-        reader.onload = async (event) => {
-            const text = event.target.result;
-            const lines = text.trim().split('\n');
-            const dataLines = lines.slice(1);
-
-            let success = 0;
-            let failed = 0;
-
-            for (const line of dataLines) {
-                if (!line.trim()) continue;
-                try {
-                    const cols = line.match(/(".*?"|[^,]+|(?<=,)(?=,)|^(?=,)|(?<=,)$)/g) || [];
-                    const clean = cols.map(v => v.replaceAll(/^"|"$/g, '').replaceAll('""', '"').trim());
-                    const [firstName, lastName, title, email, phone] = clean;
-
-                    if (!firstName && !lastName) { failed++; continue; }
-
-                    const payload = {
-                        firstName: firstName || '',
-                        lastName: lastName || '',
-                        title: title || '',
-                        contactInfos: [
-                            ...(email ? [{ type: 'EMAIL', value: email, label: 'personal' }] : []),
-                            ...(phone ? [{ type: 'PHONE', value: phone, label: 'personal' }] : []),
-                        ],
-                    };
-
-                    await createContact(payload);
-                    success++;
-                } catch {
-                    failed++;
-                }
-            }
-
-            if (onImportDone) onImportDone(success, failed);
-        };
-
-        reader.readAsText(file);
-    };
-
     return (
-        <aside className="sidebar">
-            <div className="sidebar-logo">
-                <div className="logo-icon">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
-                        <path d="M20 7H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/>
-                        <path d="M16 3H8a2 2 0 0 0-2 2v2h12V5a2 2 0 0 0-2-2z"/>
-                    </svg>
+        <>
+            <aside className="sidebar">
+                <div className="sidebar-logo">
+                    <div className="logo-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
+                            <path d="M20 7H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/>
+                            <path d="M16 3H8a2 2 0 0 0-2 2v2h12V5a2 2 0 0 0-2-2z"/>
+                        </svg>
+                    </div>
+                    <span>Contact Manager</span>
                 </div>
-                <span>Contact Manager</span>
-            </div>
 
-            <nav className="sidebar-nav">
-                <NavLink to="/contacts" className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
-                    <ContactsIcon /> <span>Contacts</span>
-                </NavLink>
-                <NavLink to="/profile" className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
-                    <ProfileIcon /> <span>My Profile</span>
-                </NavLink>
+                <nav className="sidebar-nav">
+                    <NavLink to="/contacts" className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
+                        <ContactsIcon /> <span>Contacts</span>
+                    </NavLink>
+                    <NavLink to="/profile" className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
+                        <ProfileIcon /> <span>My Profile</span>
+                    </NavLink>
 
-                <div className="sidebar-divider" />
+                    <div className="sidebar-divider" />
 
-                <label className="nav-item import-item">
-                    <UploadIcon /> <span>Import CSV</span>
-                    <input
-                        ref={fileInputRef}
-                        type="file"
-                        accept=".csv"
-                        onChange={handleImport}
-                        style={{ display: 'none' }}
-                    />
-                </label>
+                    <button className="nav-item" onClick={() => setShowImport(true)}>
+                        <UploadIcon /> <span>Import CSV</span>
+                    </button>
 
-                <button className="nav-item" onClick={handleExport}>
-                    <DownloadIcon /> <span>Export CSV</span>
+                    <button className="nav-item" onClick={() => setShowExport(true)}>
+                        <DownloadIcon /> <span>Export CSV</span>
+                    </button>
+                </nav>
+
+                <button className="nav-item logout-btn" onClick={handleLogout}>
+                    <LogoutIcon /> <span>Logout</span>
                 </button>
-            </nav>
+            </aside>
 
-            <button className="nav-item logout-btn" onClick={handleLogout}>
-                <LogoutIcon /> <span>Logout</span>
-            </button>
-        </aside>
+            {showImport && (
+                <ImportModal
+                    onClose={() => setShowImport(false)}
+                    onImportDone={onImportDone}
+                />
+            )}
+            {showExport && (
+                <ExportModal onClose={() => setShowExport(false)} />
+            )}
+        </>
     );
 }
 

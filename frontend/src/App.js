@@ -19,24 +19,23 @@ function PrivateRoute({ children }) {
 function PublicRoute({ children }) {
   const { user, loading } = useAuth();
   if (loading) return null;
-  return user ? <Navigate to="/dashboard" replace /> : children;
+  return user ? <Navigate to="/contacts" replace /> : children;
 }
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <AuthProvider>
-        <Routes>
-          <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
-          <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
-          <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
-          <Route path="/contacts" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
-          <Route path="/contacts/:id" element={<PrivateRoute><ContactDetail /></PrivateRoute>} />
-          <Route path="/add-contact" element={<PrivateRoute><AddContact /></PrivateRoute>} />
-          <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
-          <Route path="*" element={<Navigate to="/login" replace />} />
-        </Routes>
-      </AuthProvider>
-    </BrowserRouter>
+      <BrowserRouter>
+        <AuthProvider>
+          <Routes>
+            <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
+            <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
+            <Route path="/contacts" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+            <Route path="/contacts/:id" element={<PrivateRoute><ContactDetail /></PrivateRoute>} />
+            <Route path="/add-contact" element={<PrivateRoute><AddContact /></PrivateRoute>} />
+            <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
+            <Route path="*" element={<Navigate to="/login" replace />} />
+          </Routes>
+        </AuthProvider>
+      </BrowserRouter>
   );
 }

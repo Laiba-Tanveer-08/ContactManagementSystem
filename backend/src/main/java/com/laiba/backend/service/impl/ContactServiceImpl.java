@@ -171,7 +171,7 @@ public class ContactServiceImpl implements ContactService {
         log.info("Searching contacts by name: '{}', page: {}, size: {}", name, page, size);
         Users user = getCurrentUser();
         Pageable pageable = PageRequest.of(page, size);
-        Page<Contacts> contacts = contactRepository.findByUserAndFirstNameContainingIgnoreCaseOrUserAndLastNameContainingIgnoreCase(user, name, user, name, pageable);
+        Page<Contacts> contacts = contactRepository.searchByName(user, name, pageable);
         log.debug("Found {} contacts matching name '{}' for user: {}", contacts.getTotalElements(), name, user.getUsername());
         return contacts.map(contactMapper::toResponse);
     }

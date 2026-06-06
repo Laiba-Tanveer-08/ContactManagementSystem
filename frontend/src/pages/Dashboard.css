@@ -1,0 +1,237 @@
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.page-header h1 {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.header-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.loading-state, .empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 60px;
+  color: var(--text-muted);
+  font-size: 15px;
+}
+
+.contacts-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;        /* was 18px */
+  margin-bottom: 28px;
+}
+
+.contact-card {
+  background: var(--white);
+  border-radius: var(--radius);
+  padding: 24px;    /* was 20px */
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border);
+  position: relative;
+  transition: box-shadow 0.15s, transform 0.15s;
+}
+
+.contact-card:hover {
+  box-shadow: var(--shadow);
+  transform: translateY(-1px);
+}
+
+.card-menu {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  color: var(--text-light);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+}
+
+.card-menu:hover {
+  color: var(--text-muted);
+  background: var(--bg);
+}
+
+.card-top {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 14px;
+  padding-right: 20px;
+}
+
+.card-avatar {
+  flex-shrink: 0;
+}
+
+.card-info h4 {
+  font-size: 17px;      /* was 15px */
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;     /* was 160px */
+}
+
+/* Bigger title */
+.card-info span {
+  font-size: 14px;      /* was 12px */
+  color: var(--text-muted);
+}
+
+.card-details {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 14px;
+}
+
+.card-detail {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--text-muted);
+  font-size: 14px;      /* was 12.5px */
+  overflow: hidden;
+}
+
+.card-detail svg {
+  flex-shrink: 0;
+  color: var(--text-light);
+}
+
+.card-detail span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.card-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.card-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 14px;    /* was 6px 12px */
+  border-radius: 6px;
+  font-size: 14px;      /* was 12.5px */
+  font-weight: 500;
+  border: 1px solid var(--border);
+  background: var(--white);
+  color: var(--text-muted);
+  transition: all 0.15s;
+}
+
+.view-btn:hover {
+  background: var(--primary-light);
+  color: var(--primary);
+  border-color: #BFDBFE;
+}
+
+.edit-btn:hover {
+  background: var(--primary-light);
+  color: var(--primary);
+  border-color: #BFDBFE;
+}
+
+.del-btn {
+  margin-left: auto;
+  padding: 6px 10px;
+}
+
+.del-btn:hover {
+  background: #FEE2E2;
+  color: var(--danger);
+  border-color: #FECACA;
+}
+
+/* Pagination */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 24px 0 75px;  /* padding instead of margin-top */
+}
+
+.page-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 7px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.page-btn:hover:not(:disabled) {
+  background: var(--primary-light);
+  color: var(--primary);
+  border-color: #BFDBFE;
+}
+
+.page-btn.active {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+.page-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.page-dots {
+  color: var(--text-light);
+  font-size: 13px;
+}
+
+.page-info {
+  margin-left: 8px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+.dashboard-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.dashboard-content {
+  flex: 1;
+}
+.pagination {
+  position: fixed;
+  bottom: -30px;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}

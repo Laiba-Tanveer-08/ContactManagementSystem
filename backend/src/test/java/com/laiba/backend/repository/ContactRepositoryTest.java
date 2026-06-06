@@ -74,9 +74,7 @@ class ContactRepositoryTest {
 
     @Test
     void findByUserAndFirstNameContainingIgnoreCase_matchingName_returnsContact() {
-        Page<Contacts> result = contactRepository
-                .findByUserAndFirstNameContainingIgnoreCaseOrUserAndLastNameContainingIgnoreCase(
-                        mockUser, "john", mockUser, "john", PageRequest.of(0, 10));
+        Page<Contacts> result = contactRepository.searchByName(mockUser, "john", PageRequest.of(0, 10));
 
         assertEquals(1, result.getTotalElements());
         assertEquals("John", result.getContent().get(0).getFirstName());
@@ -84,9 +82,7 @@ class ContactRepositoryTest {
 
     @Test
     void findByUserAndLastNameContainingIgnoreCase_matchingLastName_returnsContact() {
-        Page<Contacts> result = contactRepository
-                .findByUserAndFirstNameContainingIgnoreCaseOrUserAndLastNameContainingIgnoreCase(
-                        mockUser, "doe", mockUser, "doe", PageRequest.of(0, 10));
+        Page<Contacts> result = contactRepository.searchByName(mockUser, "doe", PageRequest.of(0, 10));
 
         assertEquals(1, result.getTotalElements());
         assertEquals("Doe", result.getContent().get(0).getLastName());
@@ -94,18 +90,14 @@ class ContactRepositoryTest {
 
     @Test
     void searchByName_caseInsensitive_returnsContact() {
-        Page<Contacts> result = contactRepository
-                .findByUserAndFirstNameContainingIgnoreCaseOrUserAndLastNameContainingIgnoreCase(
-                        mockUser, "JOHN", mockUser, "JOHN", PageRequest.of(0, 10));
+        Page<Contacts> result = contactRepository.searchByName(mockUser, "JOHN", PageRequest.of(0, 10));
 
         assertEquals(1, result.getTotalElements());
     }
 
     @Test
     void searchByName_noMatch_returnsEmpty() {
-        Page<Contacts> result = contactRepository
-                .findByUserAndFirstNameContainingIgnoreCaseOrUserAndLastNameContainingIgnoreCase(
-                        mockUser, "xyz", mockUser, "xyz", PageRequest.of(0, 10));
+        Page<Contacts> result = contactRepository.searchByName(mockUser, "xyz", PageRequest.of(0, 10));
 
         assertEquals(0, result.getTotalElements());
     }

@@ -20,6 +20,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -231,9 +232,8 @@ class ContactServiceImplTest {
     @Test
     void getContactsByName_matchingFirstName_returnsResults() {
         Page<Contacts> page = new PageImpl<>(List.of(mockContact));
-        when(contactRepository.findByUserAndFirstNameContainingIgnoreCaseOrUserAndLastNameContainingIgnoreCase(
-                eq(mockUser), eq("John"), eq(mockUser), eq("John"), any(Pageable.class)
-        )).thenReturn(page);
+        when(contactRepository.searchByName(eq(mockUser), eq("John"), any(Pageable.class)))
+                .thenReturn(page);
         when(contactMapper.toResponse(mockContact)).thenReturn(mockResponse);
 
         Page<ContactResponse> result = contactService.getContactsByName("John", 0, 10);
@@ -243,11 +243,23 @@ class ContactServiceImplTest {
     }
 
     @Test
+    void getContactsByName_fullName_returnsResults() {
+        Page<Contacts> page = new PageImpl<>(List.of(mockContact));
+        when(contactRepository.searchByName(eq(mockUser), eq("John Doe"), any(Pageable.class)))
+                .thenReturn(page);
+        when(contactMapper.toResponse(mockContact)).thenReturn(mockResponse);
+
+        Page<ContactResponse> result = contactService.getContactsByName("John Doe", 0, 10);
+
+        assertEquals(1, result.getTotalElements());
+        assertEquals("John", result.getContent().get(0).getFirstName());
+    }
+
+    @Test
     void getContactsByName_noMatch_returnsEmptyPage() {
         Page<Contacts> emptyPage = new PageImpl<>(List.of());
-        when(contactRepository.findByUserAndFirstNameContainingIgnoreCaseOrUserAndLastNameContainingIgnoreCase(
-                eq(mockUser), eq("xyz"), eq(mockUser), eq("xyz"), any(Pageable.class)
-        )).thenReturn(emptyPage);
+        when(contactRepository.searchByName(eq(mockUser), eq("xyz"), any(Pageable.class)))
+                .thenReturn(emptyPage);
 
         Page<ContactResponse> result = contactService.getContactsByName("xyz", 0, 10);
 

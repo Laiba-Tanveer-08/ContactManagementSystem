@@ -64,7 +64,7 @@ class AuthServiceImplTest {
         SecurityContextHolder.setContext(ctx);
     }
 
-    // ─ getAuthenticatedIdentifier — null authentication branch
+    // getAuthenticatedIdentifier — null authentication branch
 
     @Test
     void changePassword_nullAuthentication_throwsAuthenticationException() {
@@ -91,7 +91,7 @@ class AuthServiceImplTest {
         assertThrows(AuthenticationException.class, () -> authService.logout());
     }
 
-    //  register
+    // register
 
     @Test
     void register_newEmailUser_returnsSuccess() {
@@ -227,7 +227,7 @@ class AuthServiceImplTest {
         assertEquals("user does not exist", authService.login(request));
     }
 
-    //  changePassword
+    // changePassword
 
     @Test
     void changePassword_validOldEmailPassword_returnsSuccess() {
@@ -325,7 +325,7 @@ class AuthServiceImplTest {
         assertEquals("user does not exist", authService.changePassword(request));
     }
 
-    //  getProfile
+    // getProfile
 
     @Test
     void getProfile_emailUser_returnsUserResponse() {
@@ -373,11 +373,19 @@ class AuthServiceImplTest {
         assertNull(authService.getProfile());
     }
 
-    //  logout
+    // logout
 
     @Test
-    void logout_clearsSecurityContextAndReturnsSuccess() {
+    void logout_emailIdentifier_clearsSecurityContextAndReturnsSuccess() {
         mockSecurityContext("test@example.com");
+
+        assertEquals("Logged out successfully", authService.logout());
+    }
+
+    // Exercises logout() with a phone-format identifier to cover the getAuthenticatedIdentifier path
+    @Test
+    void logout_phoneIdentifier_clearsSecurityContextAndReturnsSuccess() {
+        mockSecurityContext("03001234567");
 
         assertEquals("Logged out successfully", authService.logout());
     }

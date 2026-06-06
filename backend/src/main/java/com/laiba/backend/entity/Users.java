@@ -42,7 +42,7 @@ public class Users implements UserDetails {
             cascade = CascadeType.ALL,
             orphanRemoval = true
     )
-    private List<Contacts> contacts;
+    private transient List<Contacts> contacts;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

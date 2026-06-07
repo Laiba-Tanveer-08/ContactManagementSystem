@@ -1,8 +1,8 @@
 # 📇 Contact Management System
 
-A full-stack web application I built to manage contacts in one place. Users can create an account, log in securely, and manage their contact list with features like search, pagination, editing, and detailed contact profiles.
+A full-stack web application I built to manage contacts in one place. Users can create an account, log in securely and manage their contact list with features like search, pagination, editing, and detailed contact profiles.
 
-The backend is built with Spring Boot and SQL Server, while the frontend uses React.js for a responsive user experience. Authentication is handled using JWT tokens to keep user data secure.
+The backend is built with Spring Boot and SQL Server while the frontend uses React.js for a responsive user experience. Authentication is handled using JWT tokens to keep user data secure.
 
 <img width="1080" height="1080" alt="image" src="https://github.com/user-attachments/assets/4deb4ef6-247a-47ba-85c6-b2b05387524b" />
 

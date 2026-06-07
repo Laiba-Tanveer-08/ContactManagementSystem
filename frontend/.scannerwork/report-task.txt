@@ -1,0 +1,6 @@
+projectKey=ContactManagementProject-Frontend
+serverUrl=http://localhost:9000
+serverVersion=26.6.0.123539
+dashboardUrl=http://localhost:9000/dashboard?id=ContactManagementProject-Frontend
+ceTaskId=45822166-a06f-4fda-a2a0-56c77801b0ed
+ceTaskUrl=http://localhost:9000/api/ce/task?id=45822166-a06f-4fda-a2a0-56c77801b0ed

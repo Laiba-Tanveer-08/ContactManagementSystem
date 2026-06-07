@@ -40,46 +40,45 @@ class JWTServiceTest {
     void extractUsername_returnsCorrectUsername() {
         String token = jwtService.generateToken("test@example.com");
 
-        String username = jwtService.extractUsername(token);
-
-        assertEquals("test@example.com", username);
+        assertEquals("test@example.com", jwtService.extractUsername(token));
     }
 
     @Test
     void extractUsername_phoneNumber_returnsCorrectUsername() {
         String token = jwtService.generateToken("03001234567");
 
-        String username = jwtService.extractUsername(token);
-
-        assertEquals("03001234567", username);
+        assertEquals("03001234567", jwtService.extractUsername(token));
     }
 
     @Test
     void isTokenValid_validTokenAndMatchingUsername_returnsTrue() {
         String token = jwtService.generateToken("test@example.com");
 
-        boolean valid = jwtService.isTokenValid(token, "test@example.com");
-
-        assertTrue(valid);
+        assertTrue(jwtService.isTokenValid(token, "test@example.com"));
     }
 
     @Test
     void isTokenValid_wrongUsername_returnsFalse() {
         String token = jwtService.generateToken("test@example.com");
 
-        boolean valid = jwtService.isTokenValid(token, "other@example.com");
-
-        assertFalse(valid);
+        assertFalse(jwtService.isTokenValid(token, "other@example.com"));
     }
 
     @Test
     void isTokenValid_expiredToken_returnsFalse() {
+        // Negative expiration means the token is already expired at generation time
         ReflectionTestUtils.setField(jwtService, "expiration", -1000L);
         String token = jwtService.generateToken("test@example.com");
 
-        boolean valid = jwtService.isTokenValid(token, "test@example.com");
+        assertFalse(jwtService.isTokenValid(token, "test@example.com"));
+    }
 
-        assertFalse(valid);
+    @Test
+    void extractUsername_expiredToken_stillReturnsUsername() {
+        ReflectionTestUtils.setField(jwtService, "expiration", -1000L);
+        String token = jwtService.generateToken("test@example.com");
+
+        assertEquals("test@example.com", jwtService.extractUsername(token));
     }
 
     @Test
@@ -88,5 +87,15 @@ class JWTServiceTest {
         String token2 = jwtService.generateToken("user2@example.com");
 
         assertNotEquals(token1, token2);
+    }
+
+    @Test
+    void isTokenValid_malformedToken_returnsFalse() {
+        assertFalse(jwtService.isTokenValid("this.is.not.a.valid.jwt", "test@example.com"));
+    }
+
+    @Test
+    void isTokenValid_emptyToken_returnsFalse() {
+        assertFalse(jwtService.isTokenValid("", "test@example.com"));
     }
 }

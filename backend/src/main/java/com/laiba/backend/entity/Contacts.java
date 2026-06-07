@@ -31,6 +31,7 @@ public class Contacts {
     @JoinColumn(name = "user_id", nullable = false)
     private Users user;
 
+    // Deleting a contact also removes all its related contact info records
     @OneToMany(
             mappedBy = "contact",
             cascade = CascadeType.ALL,

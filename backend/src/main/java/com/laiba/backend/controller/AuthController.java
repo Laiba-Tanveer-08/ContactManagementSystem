@@ -24,33 +24,29 @@ public class AuthController {
 
     @PostMapping("/register")
     public String register(@RequestBody RegisterRequest request) {
-        log.info("POST /api/auth/register - identifier: {}", request.getIdentifier());
-        String result = authService.register(request);
-        log.info("Register result: {}", result);
-        return result;
+        log.info("Register request received for identifier: {}", request.getIdentifier());
+        return authService.register(request);
     }
 
     @PostMapping("/login")
     public String login(@RequestBody LoginRequest request) {
-        log.info("POST /api/auth/login - identifier: {}", request.getIdentifier());
-        String result = authService.login(request);
-        log.info("Login result for {}: {}", request.getIdentifier(), result.length() > 20 ? "token issued" : result);
-        return result;
+        log.info("Login request received for identifier: {}", request.getIdentifier());
+        return authService.login(request);
     }
 
     @PostMapping("/changepassword")
     public String changePassword(@RequestBody ChangePasswordRequest request) {
-        log.info("POST /api/auth/changepassword");
-        String result = authService.changePassword(request);
-        log.info("Change password result: {}", result);
-        return result;
+        log.info("Change password request received");
+        return authService.changePassword(request);
     }
 
     @GetMapping("/profile")
     public ResponseEntity<UserResponse> getProfile() {
-        log.info("GET /api/auth/profile");
+        log.info("Profile fetch request received");
         UserResponse profile = authService.getProfile();
+        // Return 404 if no profile found for the current user
         if (profile == null) {
+            log.warn("No profile found for current user");
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(profile);
@@ -58,8 +54,7 @@ public class AuthController {
 
     @PostMapping("/logout")
     public ResponseEntity<String> logout() {
-        log.info("POST /api/auth/logout");
-        String result = authService.logout();
-        return ResponseEntity.ok(result);
+        log.info("Logout request received");
+        return ResponseEntity.ok(authService.logout());
     }
 }

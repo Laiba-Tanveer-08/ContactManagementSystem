@@ -24,20 +24,17 @@ export default function ContactDetail() {
 
   const handleEdit = async (payload) => {
     await updateContact(id, payload);
-
-    // ✅ Update local state directly — no refetch, no flash
+    // Update local state directly so there's no refetch flash
     setContact(prev => ({
       ...prev,
       firstName: payload.firstName,
       lastName: payload.lastName,
       title: payload.title,
-      // Update both shapes so nothing breaks
       contactInfos: payload.contactInfos,
       emailAddresses: payload.emailAddresses,
       phoneNumbers: payload.phoneNumbers,
     }));
-
-    setShowEdit(false); // close modal smoothly
+    setShowEdit(false);
   };
 
   const handleDelete = async () => {
@@ -48,7 +45,7 @@ export default function ContactDetail() {
   if (loading) return <Layout><div className="loading-state">Loading...</div></Layout>;
   if (!contact) return null;
 
-  // Support both API shapes
+  // Support both contactInfos shape and the emailAddresses/phoneNumbers shape
   const emails = contact.contactInfos
       ? contact.contactInfos.filter(ci => ci.type === 'EMAIL' || ci.type === 'email')
       : (contact.emailAddresses || []).map(e => ({ value: e.email, label: e.label }));

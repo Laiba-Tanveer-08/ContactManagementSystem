@@ -108,6 +108,7 @@ class AuthControllerTest {
     @Test
     @WithMockUser
     void getProfile_userNotFound_returns404() throws Exception {
+        // If profile comes back null the controller should return 404
         when(authService.getProfile()).thenReturn(null);
 
         mockMvc.perform(get("/api/auth/profile"))

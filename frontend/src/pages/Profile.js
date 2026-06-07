@@ -81,6 +81,8 @@ export default function Profile() {
               {displayName && <p className="profile-display-name">{displayName}</p>}
               {(profile.email || profile.emailAddress) &&
                   <p className="profile-display-email">{profile.email || profile.emailAddress}</p>}
+              {(profile.phoneNo || profile.phoneNumber) &&
+                  <p className="profile-display-email">{profile.phoneNo || profile.phoneNumber}</p>}
             </div>
 
             <div className="profile-info">

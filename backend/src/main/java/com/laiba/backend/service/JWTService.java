@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
 import java.security.Key;
+import java.time.Instant;
 import java.util.Date;
 
 @Service
@@ -26,10 +27,11 @@ public class JWTService {
     }
 
     public String generateToken(String username) {
+        Instant now = Instant.now();
         return Jwts.builder()
                 .subject(username)
-                .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + expiration))
+                .issuedAt(Date.from(now))
+                .expiration(Date.from(now.plusMillis(expiration)))
                 .signWith(getSigningKey())
                 .compact();
     }
@@ -51,10 +53,11 @@ public class JWTService {
         }
     }
 
+    // Uses java.time Instant instead of legacy Date for comparison
     private boolean isTokenExpired(String token) {
         try {
-            Date expirationDate = parseClaims(token).getExpiration();
-            return expirationDate.before(new Date());
+            Instant expiry = parseClaims(token).getExpiration().toInstant();
+            return expiry.isBefore(Instant.now());
         } catch (ExpiredJwtException e) {
             return true;
         }

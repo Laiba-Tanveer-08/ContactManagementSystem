@@ -35,14 +35,13 @@ public class JWTAuthFilter extends OncePerRequestFilter {
         final String authHeader = request.getHeader("Authorization");
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            log.debug("No Bearer token found for request: {}", request.getRequestURI());
             filterChain.doFilter(request, response);
             return;
         }
 
         final String token = authHeader.substring(7).trim();
 
-        // Guard: a valid JWT has exactly 3 dot-separated parts and no whitespace
+        //  Valid JWT always has 3 parts separated by dots, skip anything that doesn't match
         if (token.isEmpty() || token.contains(" ") || token.chars().filter(c -> c == '.').count() != 2) {
             log.warn("Malformed token rejected for request: {}", request.getRequestURI());
             filterChain.doFilter(request, response);
@@ -58,8 +57,7 @@ public class JWTAuthFilter extends OncePerRequestFilter {
             return;
         }
 
-        log.debug("JWT token extracted for identifier: {}", identifier);
-
+        // Only set auth if user is found and not already authenticated
         if (identifier != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = userDetailsService.loadUserByUsername(identifier);
             if (jwtService.isTokenValid(token, userDetails.getUsername())) {
@@ -67,7 +65,6 @@ public class JWTAuthFilter extends OncePerRequestFilter {
                         userDetails, null, userDetails.getAuthorities());
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authToken);
-                log.info("JWT authentication successful for identifier: {}", identifier);
             } else {
                 log.warn("Invalid JWT token for identifier: {}", identifier);
             }

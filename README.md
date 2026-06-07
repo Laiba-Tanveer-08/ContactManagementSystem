@@ -1,30 +1,50 @@
+<div align="center">
+
 # 📇 Contact Management System
 
-> A full-stack web application to manage all your contacts in one secure place.
+### A full-stack web application to manage all your contacts in one secure place
 
-[![Java](https://img.shields.io/badge/Java-17-orange?style=flat-square&logo=java)](https://www.oracle.com/java/)
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.x-brightgreen?style=flat-square&logo=springboot)](https://spring.io/projects/spring-boot)
-[![React](https://img.shields.io/badge/React-18-blue?style=flat-square&logo=react)](https://react.dev/)
-[![SQL Server](https://img.shields.io/badge/SQL%20Server-Express-red?style=flat-square&logo=microsoftsqlserver)](https://www.microsoft.com/en-us/sql-server)
-[![Coverage](https://img.shields.io/badge/Coverage-100%25-success?style=flat-square)](https://www.sonarqube.org/)
+<br/>
 
-Users can create an account, log in securely, and manage their contact list with features like search, pagination, editing, and detailed contact profiles. The backend is built with **Spring Boot** and **SQL Server**, while the frontend uses **React.js**. Authentication is handled using **JWT tokens** to keep user data secure.
+[![Java](https://img.shields.io/badge/Java_17-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)](https://www.oracle.com/java/)
+[![Spring Boot](https://img.shields.io/badge/Spring_Boot-6DB33F?style=for-the-badge&logo=springboot&logoColor=white)](https://spring.io/projects/spring-boot)
+[![React](https://img.shields.io/badge/React_18-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://react.dev/)
+[![SQL Server](https://img.shields.io/badge/SQL_Server-CC2927?style=for-the-badge&logo=microsoftsqlserver&logoColor=white)](https://www.microsoft.com/en-us/sql-server)
+[![JWT](https://img.shields.io/badge/JWT-000000?style=for-the-badge&logo=jsonwebtokens&logoColor=white)](https://jwt.io/)
+[![Coverage](https://img.shields.io/badge/Coverage-100%25-brightgreen?style=for-the-badge&logo=sonarqube&logoColor=white)](https://www.sonarqube.org/)
+
+<br/>
+
+*Users can register securely, log in and manage a full contact list with search, pagination, editing and detailed profiles. The backend is powered by **Spring Boot** and **SQL Server** while the frontend is built with **React.js**. All routes are protected using **JWT token** authentication.*
+
+<br/>
 
 ---
 
-## 📸 Screenshots
+</div>
+
+## 📸 &nbsp; Screenshots
+
+<div align="center">
 
 | Dashboard | Contact Details | Contact Form |
 |:---------:|:---------------:|:------------:|
 | ![Dashboard](https://github.com/user-attachments/assets/4deb4ef6-247a-47ba-85c6-b2b05387524b) | ![Details](https://github.com/user-attachments/assets/0c317f35-bdc2-431a-91bc-64a935d2a924) | ![Form](https://github.com/user-attachments/assets/25f1b509-8178-492c-ade5-3968b56ec909) |
 
+</div>
+
+<br/>
+
 ---
 
-## 🛠️ Tech Stack
+## 🛠️ &nbsp; Tech Stack
 
-### Backend
+<div align="center">
+
+### ⚙️ Backend
+
 | Technology | Purpose |
-|---|---|
+|:----------:|:-------:|
 | Java 17 | Core language |
 | Spring Boot | Application framework |
 | Spring Data JPA + Hibernate | ORM & database access |
@@ -34,32 +54,39 @@ Users can create an account, log in securely, and manage their contact list with
 | JUnit 5 + Mockito | Unit testing |
 | SonarQube | Code quality analysis |
 
-### Frontend
+<br/>
+
+### 🎨 Frontend
+
 | Technology | Purpose |
-|---|---|
+|:----------:|:-------:|
 | React.js 18 | UI framework |
 | React Router | Client-side routing |
 | Axios | HTTP client |
 
+</div>
+
+<br/>
+
 ---
 
-## 🚀 Features
+## 🚀 &nbsp; Features
 
 ### 🔐 Authentication
 - Register using email or phone number
 - Secure login with JWT authentication
 - Passwords are encrypted before storage
-- Change password from profile page
+- Change password from the profile page
 - Logout functionality
 
 ### 👥 Contact Management
-- Add, edit, and delete contacts
+- Add, edit and delete contacts
 - Search contacts by first or last name
 - View detailed contact profiles
-- Paginated contact list (10 contacts per page)
+- Paginated contact list *(10 contacts per page)*
 
 ### 📞 Contact Information
-Each contact can contain:
+Each contact can store:
 - First name & last name
 - Title
 - Multiple email addresses *(Work, Personal, etc.)*
@@ -73,9 +100,11 @@ Each contact can contain:
 - DTO-based API structure
 - Unit testing with JUnit and Mockito
 
+<br/>
+
 ---
 
-## 📂 Project Structure
+## 📂 &nbsp; Project Structure
 
 ```
 ContactManagementProject/
@@ -99,29 +128,35 @@ ContactManagementProject/
         └── services/
 ```
 
+<br/>
+
 ---
 
-## ⚙️ Getting Started
+## ⚙️ &nbsp; Getting Started
 
 ### Prerequisites
 
-Make sure you have the following installed:
+Make sure you have the following installed before running the project:
 
-- [Java 17](https://www.oracle.com/java/technologies/downloads/#java17)
-- [Node.js v18+](https://nodejs.org/)
-- [SQL Server Express](https://www.microsoft.com/en-us/sql-server/sql-server-downloads)
-- [Maven](https://maven.apache.org/) *(or use the included Maven Wrapper)*
+| Requirement | Version |
+|:-----------:|:-------:|
+| [Java](https://www.oracle.com/java/technologies/downloads/#java17) | 17+ |
+| [Node.js](https://nodejs.org/) | 18+ |
+| [SQL Server Express](https://www.microsoft.com/en-us/sql-server/sql-server-downloads) | Any |
+| [Maven](https://maven.apache.org/) | Latest *(or use the included wrapper)* |
+
+<br/>
 
 ---
 
-## 🗄️ Database Setup
+## 🗄️ &nbsp; Database Setup
 
-**1. Create the database:**
+**Step 1 — Create the database:**
 ```sql
 CREATE DATABASE contactmanagementdb;
 ```
 
-**2. Create a login and user:**
+**Step 2 — Create a login and user:**
 ```sql
 CREATE LOGIN springuser WITH PASSWORD = 'Spring@12345';
 
@@ -132,11 +167,13 @@ CREATE USER springuser FOR LOGIN springuser;
 ALTER ROLE db_owner ADD MEMBER springuser;
 ```
 
-> Hibernate is configured with `ddl-auto=update`, so all required tables are created automatically on first run.
+> 💡 Hibernate is configured with `ddl-auto=update` — all required tables are created automatically on first run.
+
+<br/>
 
 ---
 
-## ▶️ Running the Application
+## ▶️ &nbsp; Running the Application
 
 ### Backend
 
@@ -150,7 +187,9 @@ cd backend
 mvnw.cmd spring-boot:run
 ```
 
-Backend runs at: `http://localhost:8080`
+🌐 Backend runs at: `http://localhost:8080`
+
+<br/>
 
 ### Frontend
 
@@ -160,16 +199,20 @@ npm install
 npm start
 ```
 
-Frontend runs at: `http://localhost:3000`
+🌐 Frontend runs at: `http://localhost:3000`
+
+<br/>
 
 ---
 
-## 📡 API Endpoints
+## 📡 &nbsp; API Endpoints
 
-> All contact endpoints require a valid **JWT token** in the `Authorization` header.
+<div align="center">
+
+> 🔒 All contact endpoints require a valid **JWT token** in the `Authorization` header.
 
 | Method | Endpoint | Description |
-|--------|----------|-------------|
+|:------:|:--------:|:-----------:|
 | `POST` | `/api/auth/register` | Register a new user |
 | `POST` | `/api/auth/login` | Login |
 | `GET` | `/api/contact/getcontacts?page=0&size=10` | Get paginated contacts |
@@ -179,52 +222,75 @@ Frontend runs at: `http://localhost:3000`
 | `PUT` | `/api/contact/update/{id}` | Update a contact |
 | `DELETE` | `/api/contact/delete/{id}` | Delete a contact |
 
+</div>
+
+<br/>
+
 ---
 
-## 🧪 Testing
+## 🧪 &nbsp; Testing
 
-Run the backend test suite:
+Run the full backend test suite:
 
 ```bash
 cd backend
 ./mvnw test
 ```
 
-Tests cover:
-- Controllers
-- Services
-- Repositories
-- JWT functionality
-- Security configuration
-- Exception handling
+
+
+| Area Covered |
+|:------------:|
+| Controllers |
+| Services |
+| Repositories |
+| JWT functionality |
+| Security configuration |
+| Exception handling |
+
+
+
+<br/>
 
 ---
 
-## 📊 Code Quality
+## 📊 &nbsp; Code Quality
 
-✅ Achieved **100% code coverage** during SonarQube analysis.
+<div align="center">
+
+### ✅ Achieved 100% Code Coverage via SonarQube
 
 ![SonarQube Report](https://github.com/user-attachments/assets/19dbb18c-67b5-40da-a7c0-51e1e9ab5203)
 
----
+</div>
 
-## 📝 Notes
-
-- JWT tokens expire after **24 hours**
-- Passwords are **never stored in plain text**
-- Session state is managed using **React Context**
-- Global exception handling provides consistent API responses
-- Contacts are displayed in a **paginated view** for better performance
+<br/>
 
 ---
 
-## 🔀 Git Workflow
+## 📝 &nbsp; Notes
 
-Development was done on a **feature branch** and merged into `main` after testing and verification.
+| Detail | Info |
+|:------:|:----:|
+| 🔑 JWT Expiry | 24 hours |
+| 🔒 Password Storage | Encrypted — never plain text |
+| 🧠 Session State | Managed via React Context |
+| 🛡️ Error Handling | Global exception handler for consistent API responses |
+| 📄 Pagination | 10 contacts per page for better performance |
+
+<br/>
 
 ---
 
-## 📚 What I Learned
+## 🔀 &nbsp; Git Workflow
+
+Development was done on a dedicated **feature branch** and merged into `main` after testing and verification.
+
+<br/>
+
+---
+
+## 📚 &nbsp; What I Learned
 
 Building this project gave me hands-on experience with:
 
@@ -237,11 +303,24 @@ Building this project gave me hands-on experience with:
 - Code quality analysis with SonarQube
 - Designing and delivering a complete full-stack application end-to-end
 
+<br/>
+
 ---
 
-## 👩‍💻 Author
+## 👩‍💻 &nbsp; Author
 
-**Laiba Tanveer**
+<div align="center">
 
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-Laiba%20Tanveer-blue?style=flat-square&logo=linkedin)](https://www.linkedin.com/in/laiba-tanveerr/)
-[![Gmail](https://img.shields.io/badge/Gmail-laibaatanveerr%40gmail.com-red?style=flat-square&logo=gmail)](mailto:laibaatanveerr@gmail.com)
+### Laiba Tanveer
+
+<br/>
+
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/laiba-tanveerr/)
+&nbsp;
+[![Gmail](https://img.shields.io/badge/Gmail-EA4335?style=for-the-badge&logo=gmail&logoColor=white)](mailto:laibaatanveerr@gmail.com)
+
+<br/>
+
+*Feel free to reach out for collaboration or feedback!*
+
+</div>

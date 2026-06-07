@@ -1,82 +1,83 @@
 # 📇 Contact Management System
 
-A full-stack web application I built to manage contacts in one place. Users can create an account, log in securely and manage their contact list with features like search, pagination, editing, and detailed contact profiles.
+> A full-stack web application to manage all your contacts in one secure place.
 
-The backend is built with Spring Boot and SQL Server while the frontend uses React.js for a responsive user experience. Authentication is handled using JWT tokens to keep user data secure.
+[![Java](https://img.shields.io/badge/Java-17-orange?style=flat-square&logo=java)](https://www.oracle.com/java/)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.x-brightgreen?style=flat-square&logo=springboot)](https://spring.io/projects/spring-boot)
+[![React](https://img.shields.io/badge/React-18-blue?style=flat-square&logo=react)](https://react.dev/)
+[![SQL Server](https://img.shields.io/badge/SQL%20Server-Express-red?style=flat-square&logo=microsoftsqlserver)](https://www.microsoft.com/en-us/sql-server)
+[![Coverage](https://img.shields.io/badge/Coverage-100%25-success?style=flat-square)](https://www.sonarqube.org/)
 
-<img width="1080" height="1080" alt="image" src="https://github.com/user-attachments/assets/4deb4ef6-247a-47ba-85c6-b2b05387524b" />
+Users can create an account, log in securely, and manage their contact list with features like search, pagination, editing, and detailed contact profiles. The backend is built with **Spring Boot** and **SQL Server**, while the frontend uses **React.js**. Authentication is handled using **JWT tokens** to keep user data secure.
 
-<img width="1080" height="1080" alt="image" src="https://github.com/user-attachments/assets/0c317f35-bdc2-431a-91bc-64a935d2a924" />
+---
 
-<img width="1080" height="1080" alt="image" src="https://github.com/user-attachments/assets/25f1b509-8178-492c-ade5-3968b56ec909" />
+## 📸 Screenshots
+
+| Dashboard | Contact Details | Contact Form |
+|:---------:|:---------------:|:------------:|
+| ![Dashboard](https://github.com/user-attachments/assets/4deb4ef6-247a-47ba-85c6-b2b05387524b) | ![Details](https://github.com/user-attachments/assets/0c317f35-bdc2-431a-91bc-64a935d2a924) | ![Form](https://github.com/user-attachments/assets/25f1b509-8178-492c-ade5-3968b56ec909) |
 
 ---
 
 ## 🛠️ Tech Stack
 
 ### Backend
-
-* Java 17
-* Spring Boot
-* Spring Data JPA + Hibernate
-* Spring Security + JWT
-* SQL Server
-* SLF4J + Logback
-* JUnit 5 + Mockito
-* SonarQube
+| Technology | Purpose |
+|---|---|
+| Java 17 | Core language |
+| Spring Boot | Application framework |
+| Spring Data JPA + Hibernate | ORM & database access |
+| Spring Security + JWT | Authentication & authorization |
+| SQL Server | Relational database |
+| SLF4J + Logback | Logging |
+| JUnit 5 + Mockito | Unit testing |
+| SonarQube | Code quality analysis |
 
 ### Frontend
-
-* React.js 18
-* React Router
-* Axios
+| Technology | Purpose |
+|---|---|
+| React.js 18 | UI framework |
+| React Router | Client-side routing |
+| Axios | HTTP client |
 
 ---
 
 ## 🚀 Features
 
 ### 🔐 Authentication
-
-* Register using email or phone number
-* Secure login with JWT authentication
-* Passwords are encrypted before storage
-* Change password from profile page
-* Logout functionality
+- Register using email or phone number
+- Secure login with JWT authentication
+- Passwords are encrypted before storage
+- Change password from profile page
+- Logout functionality
 
 ### 👥 Contact Management
-
-* Add new contacts
-* Edit existing contacts
-* Delete contacts
-* Search contacts by first or last name
-* View detailed contact profiles
-* Paginated contact list (10 contacts per page)
+- Add, edit, and delete contacts
+- Search contacts by first or last name
+- View detailed contact profiles
+- Paginated contact list (10 contacts per page)
 
 ### 📞 Contact Information
-
 Each contact can contain:
-
-* First name
-* Last name
-* Title
-* Multiple email addresses (Work, Personal, etc.)
-* Multiple phone numbers (Home, Work, Mobile, etc.)
+- First name & last name
+- Title
+- Multiple email addresses *(Work, Personal, etc.)*
+- Multiple phone numbers *(Home, Work, Mobile, etc.)*
 
 ### ⚡ Additional Features
-
-* Import contacts from CSV files
-* Export contacts to CSV files
-* Global exception handling
-* Meaningful error messages
-* Application-wide logging
-* DTO-based API structure
-* Unit testing with JUnit and Mockito
+- Import contacts from CSV files
+- Export contacts to CSV files
+- Global exception handling with meaningful error messages
+- Application-wide logging
+- DTO-based API structure
+- Unit testing with JUnit and Mockito
 
 ---
 
 ## 📂 Project Structure
 
-```text
+```
 ContactManagementProject/
 ├── backend/
 │   └── src/
@@ -104,25 +105,23 @@ ContactManagementProject/
 
 ### Prerequisites
 
-Before running the project, make sure you have:
+Make sure you have the following installed:
 
-* Java 17
-* Node.js (v18 or later)
-* SQL Server Express
-* Maven (or Maven Wrapper)
+- [Java 17](https://www.oracle.com/java/technologies/downloads/#java17)
+- [Node.js v18+](https://nodejs.org/)
+- [SQL Server Express](https://www.microsoft.com/en-us/sql-server/sql-server-downloads)
+- [Maven](https://maven.apache.org/) *(or use the included Maven Wrapper)*
 
 ---
 
 ## 🗄️ Database Setup
 
-Create the database:
-
+**1. Create the database:**
 ```sql
 CREATE DATABASE contactmanagementdb;
 ```
 
-Create a login and user:
-
+**2. Create a login and user:**
 ```sql
 CREATE LOGIN springuser WITH PASSWORD = 'Spring@12345';
 
@@ -133,7 +132,7 @@ CREATE USER springuser FOR LOGIN springuser;
 ALTER ROLE db_owner ADD MEMBER springuser;
 ```
 
-Hibernate is configured with `ddl-auto=update`, so all required tables will be created automatically when the application starts.
+> Hibernate is configured with `ddl-auto=update`, so all required tables are created automatically on first run.
 
 ---
 
@@ -143,20 +142,15 @@ Hibernate is configured with `ddl-auto=update`, so all required tables will be c
 
 ```bash
 cd backend
+
+# macOS / Linux
 ./mvnw spring-boot:run
-```
 
-**Windows**
-
-```bash
+# Windows
 mvnw.cmd spring-boot:run
 ```
 
-Backend URL:
-
-```text
-http://localhost:8080
-```
+Backend runs at: `http://localhost:8080`
 
 ### Frontend
 
@@ -166,48 +160,43 @@ npm install
 npm start
 ```
 
-Frontend URL:
-
-```text
-http://localhost:3000
-```
+Frontend runs at: `http://localhost:3000`
 
 ---
 
 ## 📡 API Endpoints
 
-| Method | Endpoint                                  | Description            |
-| ------ | ----------------------------------------- | ---------------------- |
-| POST   | `/api/auth/register`                      | Register a new user    |
-| POST   | `/api/auth/login`                         | Login                  |
-| GET    | `/api/contact/getcontacts?page=0&size=10` | Get paginated contacts |
-| GET    | `/api/contact/{id}`                       | Get contact details    |
-| GET    | `/api/contact/search?name=xyz`            | Search contacts        |
-| POST   | `/api/contact/addcontact`                 | Create contact         |
-| PUT    | `/api/contact/update/{id}`                | Update contact         |
-| DELETE | `/api/contact/delete/{id}`                | Delete contact         |
+> All contact endpoints require a valid **JWT token** in the `Authorization` header.
 
-> All contact endpoints require a valid JWT token.
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/api/auth/register` | Register a new user |
+| `POST` | `/api/auth/login` | Login |
+| `GET` | `/api/contact/getcontacts?page=0&size=10` | Get paginated contacts |
+| `GET` | `/api/contact/{id}` | Get contact details |
+| `GET` | `/api/contact/search?name=xyz` | Search contacts |
+| `POST` | `/api/contact/addcontact` | Create a contact |
+| `PUT` | `/api/contact/update/{id}` | Update a contact |
+| `DELETE` | `/api/contact/delete/{id}` | Delete a contact |
 
 ---
 
 ## 🧪 Testing
 
-Run backend tests:
+Run the backend test suite:
 
 ```bash
 cd backend
 ./mvnw test
 ```
 
-The test suite covers:
-
-* Controllers
-* Services
-* Repositories
-* JWT functionality
-* Security configuration
-* Exception handling
+Tests cover:
+- Controllers
+- Services
+- Repositories
+- JWT functionality
+- Security configuration
+- Exception handling
 
 ---
 
@@ -215,35 +204,44 @@ The test suite covers:
 
 ✅ Achieved **100% code coverage** during SonarQube analysis.
 
-<img width="1600" height="618" alt="image" src="https://github.com/user-attachments/assets/19dbb18c-67b5-40da-a7c0-51e1e9ab5203" />
-
----
-
-## 📚 What I Learned
-
-Building this project helped me gain practical experience with:
-
-* Spring Security and JWT authentication
-* REST API development
-* SQL Server integration
-* React state management
-* Frontend and backend communication
-* Unit testing and mocking
-* Code quality analysis using SonarQube
-* Designing and building a complete full-stack application
+![SonarQube Report](https://github.com/user-attachments/assets/19dbb18c-67b5-40da-a7c0-51e1e9ab5203)
 
 ---
 
 ## 📝 Notes
 
-* JWT tokens expire after 24 hours
-* Passwords are never stored in plain text
-* Session state is managed using React Context
-* Global exception handling provides consistent API responses
-* Contacts are displayed in a paginated view for better performance
+- JWT tokens expire after **24 hours**
+- Passwords are **never stored in plain text**
+- Session state is managed using **React Context**
+- Global exception handling provides consistent API responses
+- Contacts are displayed in a **paginated view** for better performance
 
 ---
 
 ## 🔀 Git Workflow
 
-Development was done on a feature branch and later merged into the main branch after testing and verification.
+Development was done on a **feature branch** and merged into `main` after testing and verification.
+
+---
+
+## 📚 What I Learned
+
+Building this project gave me hands-on experience with:
+
+- Spring Security and JWT authentication
+- REST API design and development
+- SQL Server integration with Hibernate
+- React state management with Context API
+- Full-stack frontend–backend communication
+- Unit testing and mocking with JUnit & Mockito
+- Code quality analysis with SonarQube
+- Designing and delivering a complete full-stack application end-to-end
+
+---
+
+## 👩‍💻 Author
+
+**Laiba Tanveer**
+
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Laiba%20Tanveer-blue?style=flat-square&logo=linkedin)](https://www.linkedin.com/in/laiba-tanveerr/)
+[![Gmail](https://img.shields.io/badge/Gmail-laibaatanveerr%40gmail.com-red?style=flat-square&logo=gmail)](mailto:laibaatanveerr@gmail.com)

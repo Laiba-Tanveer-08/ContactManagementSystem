@@ -11,7 +11,7 @@
 [![React](https://img.shields.io/badge/React_18-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://react.dev/)
 [![SQL Server](https://img.shields.io/badge/SQL_Server-CC2927?style=for-the-badge&logo=microsoftsqlserver&logoColor=white)](https://www.microsoft.com/en-us/sql-server)
 [![JWT](https://img.shields.io/badge/JWT-000000?style=for-the-badge&logo=jsonwebtokens&logoColor=white)](https://jwt.io/)
-[![Coverage](https://img.shields.io/badge/Coverage-100%25-brightgreen?style=for-the-badge&logo=sonarqube&logoColor=white)](https://www.sonarqube.org/)
+[![Coverage](https://img.shields.io/badge/Coverage-99%25-brightgreen?style=for-the-badge&logo=sonarqube&logoColor=white)](https://www.sonarqube.org/)
 
 <br/>
 
@@ -258,9 +258,10 @@ cd backend
 
 <div align="center">
 
-### ✅ Achieved 100% Code Coverage via SonarQube
+### ✅ Achieved 99% Code Coverage via SonarQube
 
-![SonarQube Report](https://github.com/user-attachments/assets/19dbb18c-67b5-40da-a7c0-51e1e9ab5203)
+<img width="1600" height="659" alt="image" src="https://github.com/user-attachments/assets/86d4b97d-9d50-4a84-9dfe-4aedf26f696f" />
+
 
 </div>
 

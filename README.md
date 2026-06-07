@@ -285,7 +285,7 @@ cd backend
 
 ## 🔀 &nbsp; Git Workflow
 
-Development was done on a dedicated **feature branch** and merged into `main` after testing and verification.
+Development was done on a dedicated **feature branch** and merged into `master` after testing and verification.
 
 <br/>
 
